@@ -1,5 +1,3 @@
-// src/app/api/auth/[...nextauth]/route.ts
-
 import { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
@@ -47,7 +45,11 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        return user;
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        };
       },
     }),
   ],
