@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--background: #ffffff;
+	--foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background: #0a0a0a;
+		--foreground: #ededed;
+	}
+}
+
+body {
+	color: var(--foreground);
+	background: var(--background);
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+	.text-balance {
+		text-wrap: balance;
+	}
+}
+
+/* Auth Page Styles */
+.auth-form {
+	border: 2px solid #000000;
+}
+
+.inputForm {
+	border: 1.5px solid #ecedec;
+	border-radius: 10px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	padding-left: 10px;
+}
+
+.input {
+	margin-left: 10px;
+	border-radius: 10px;
+	border: none;
+	width: 85%;
+	height: 100%;
+	background-color: white;
+	color: black;
+}
+
+.input:focus {
+	outline: none;
+}
+
+.flex-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	justify-content: space-between;
+}
+
+.span {
+	font-size: 14px;
+	color: #2d79f3;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.button-submit {
+	margin: 20px 0 10px 0;
+	background-color: #151717;
+	border: none;
+	color: white;
+	font-size: 15px;
+	font-weight: 500;
+	border-radius: 10px;
+	height: 50px;
+	width: 100%;
+	cursor: pointer;
+}
+
+.button-submit:hover {
+	background-color: #252727;
+}
+
+.p {
+	text-align: center;
+	color: black;
+	font-size: 14px;
+	margin: 5px 0;
+}
+
+.btn {
+	height: 50px;
+	border-radius: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: 500;
+	gap: 10px;
+	border: 1px solid #000000;
+	background-color: #f5f5f5;
+	color: #000000;
+	cursor: pointer;
+	transition: 0.2s ease-in-out;
+	padding: 0 10px;
+}
+
+.btn:hover {
+	background-color: #e0e0e0;
+}
+
+.auth-tab {
+	background-color: #f5f5f5;
+	color: #000000;
+}
+
+.auth-tab[data-state='active'] {
+	background-color: #000000;
+	color: #ffffff;
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+	.inputForm {
+		height: 40px;
+	}
+
+	.button-submit {
+		height: 40px;
+		font-size: 14px;
+	}
+
+	.btn {
+		height: 40px;
+		font-size: 14px;
+		padding: 0 5px;
+	}
+
+	.flex-row {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
