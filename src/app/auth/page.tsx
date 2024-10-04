@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, AuthError, OAuthProvider } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, AuthError } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import { useAuth } from '@/contexts/AuthContext'
 import { createUserProfile } from '@/utils/user'
@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FcGoogle } from 'react-icons/fc'
-import { FaApple } from 'react-icons/fa'
+import { FaFacebook } from 'react-icons/fa'
 import Navbar from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter'
@@ -167,10 +167,10 @@ const AuthPage: React.FC = () => {
     }
   }
 
-  const handleAppleSignIn = async () => {
+  const handleFacebookSignIn = async () => {
     setSuccessMessage('')
     setIsLoading(true)
-    const provider = new OAuthProvider('apple.com')
+    const provider = new FacebookAuthProvider()
     try {
       const result = await signInWithPopup(auth, provider)
       await createUserProfile(result.user)
@@ -182,7 +182,7 @@ const AuthPage: React.FC = () => {
       }
     } catch (error) {
       const authError = error as AuthError
-      toast.error(authError.message || 'Failed to sign in with Apple. Please try again.')
+      toast.error(authError.message || 'Failed to sign in with Facebook. Please try again.')
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -391,13 +391,13 @@ const AuthPage: React.FC = () => {
                 Google
               </Button>
               <Button 
-                onClick={handleAppleSignIn} 
+                onClick={handleFacebookSignIn} 
                 variant="outline" 
-                className="btn apple w-[48%]"
+                className="btn facebook w-[48%]"
                 disabled={isLoading}
               >
-                <FaApple className="mr-2 h-4 w-4" />
-                Apple
+                <FaFacebook className="mr-2 h-4 w-4 text-blue-600" />
+                Facebook
               </Button>
             </div>
           </CardFooter>
