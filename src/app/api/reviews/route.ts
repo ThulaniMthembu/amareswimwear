@@ -5,10 +5,19 @@ import { Review } from '@/types'
 
 // Initialize Firebase Admin SDK
 if (!getApps().length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}')
-  initializeApp({
-    credential: cert(serviceAccount)
-  })
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}')
+    if (!serviceAccount.project_id) {
+      throw new Error('Invalid service account: missing project_id')
+    }
+    initializeApp({
+      credential: cert(serviceAccount)
+    })
+    console.log('Firebase Admin SDK initialized successfully')
+  } catch (error) {
+    console.error('Failed to initialize Firebase Admin:', error)
+    throw error // This will cause the API route to fail if Firebase can't be initialized
+  }
 }
 
 const db = getFirestore()
@@ -23,7 +32,7 @@ export async function GET(request: Request) {
     }
 
     const snapshot = await db.collection('reviews').where('productId', '==', productId).get()
-    const reviews = snapshot.docs.map(doc => doc.data() as Review)
+    const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review))
 
     return NextResponse.json(reviews)
   } catch (error) {
@@ -41,17 +50,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Product ID and review are required' }, { status: 400 })
     }
 
-    const newReview: Review = {
-      id: Date.now().toString(),
+    const newReview: Omit<Review, 'id'> = {
       ...review,
       productId,
       createdAt: new Date().toISOString()
     }
 
     const docRef = await db.collection('reviews').add(newReview)
-    newReview.id = docRef.id
+    const createdReview: Review = { id: docRef.id, ...newReview }
 
-    return NextResponse.json(newReview, { status: 201 })
+    return NextResponse.json(createdReview, { status: 201 })
   } catch (error) {
     console.error("Error in POST /api/reviews:", error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
