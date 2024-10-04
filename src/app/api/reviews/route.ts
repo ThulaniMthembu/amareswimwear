@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
-import { adminDb } from '@/lib/firebase-admin'
+import { getFirestore } from 'firebase-admin/firestore'
+import { initializeApp, getApps, cert } from 'firebase-admin/app'
 import { Review } from '@/types'
+
+// Initialize Firebase Admin SDK
+if (!getApps().length) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}')
+  initializeApp({
+    credential: cert(serviceAccount)
+  })
+}
+
+const db = getFirestore()
 
 export async function GET(request: Request) {
   try {
@@ -11,9 +22,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 })
     }
 
-    const snapshot = await adminDb.ref(`reviews/${productId}`).once('value')
-    const reviewsObj = snapshot.val() || {}
-    const reviews = Object.values(reviewsObj) as Review[]
+    const snapshot = await db.collection('reviews').where('productId', '==', productId).get()
+    const reviews = snapshot.docs.map(doc => doc.data() as Review)
 
     return NextResponse.json(reviews)
   } catch (error) {
@@ -34,12 +44,12 @@ export async function POST(request: Request) {
     const newReview: Review = {
       id: Date.now().toString(),
       ...review,
+      productId,
       createdAt: new Date().toISOString()
     }
 
-    const newReviewRef = await adminDb.ref(`reviews/${productId}`).push()
-    newReview.id = newReviewRef.key || newReview.id
-    await newReviewRef.set(newReview)
+    const docRef = await db.collection('reviews').add(newReview)
+    newReview.id = docRef.id
 
     return NextResponse.json(newReview, { status: 201 })
   } catch (error) {
