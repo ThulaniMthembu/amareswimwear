@@ -135,7 +135,7 @@ const ContactPage: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="text-[#1c1c1c]" />
-                  <p className="text-[#1c1c1c]">swimbyamare@gmail.com</p>
+                  <p className="text-[#1c1c1c]">amareresortwear@gmail.com</p>
                 </div>
               </div>
               <div className="mt-8">
