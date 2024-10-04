@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/firebase-admin'
 import { Review } from '@/types'
+import { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore'
 
 async function handleGET(request: Request) {
   try {
@@ -14,7 +15,7 @@ async function handleGET(request: Request) {
     console.log(`Fetching reviews for product ${productId}`)
 
     const snapshot = await db.collection('reviews').where('productId', '==', parseInt(productId)).get()
-    const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review))
+    const reviews = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() } as Review))
 
     console.log(`Found ${reviews.length} reviews for product ${productId}`)
 
