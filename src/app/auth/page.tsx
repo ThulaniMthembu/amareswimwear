@@ -119,6 +119,13 @@ const AuthPage: React.FC = () => {
     e.preventDefault()
     setSuccessMessage('')
     setIsLoading(true)
+
+    if (!recaptchaValue) {
+      toast.error('Please complete the reCAPTCHA verification.')
+      setIsLoading(false)
+      return
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password)
       const redirect = searchParams.get('redirect')
@@ -133,6 +140,8 @@ const AuthPage: React.FC = () => {
       console.error(error)
     } finally {
       setIsLoading(false)
+      recaptchaRef.current?.reset()
+      setRecaptchaValue(null)
     }
   }
 
@@ -269,7 +278,12 @@ const AuthPage: React.FC = () => {
                     </div>
                     <Link href="/reset-password" className="span">Forgot password?</Link>
                   </div>
-                  <Button type="submit" className="button-submit" disabled={isLoading}>
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+                    onChange={(value: string | null) => setRecaptchaValue(value)}
+                  />
+                  <Button type="submit" className="button-submit" disabled={isLoading || !recaptchaValue}>
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </form>
