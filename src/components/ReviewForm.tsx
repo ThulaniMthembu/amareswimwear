@@ -7,10 +7,11 @@ import { Review } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 
 type ReviewFormProps = {
+  productId: number; // Add this line
   onSubmit: (review: Omit<Review, 'id' | 'userId' | 'userName' | 'createdAt'>) => void;
 };
 
-export const ReviewForm: React.FC<ReviewFormProps> = ({ onSubmit }) => {
+export const ReviewForm: React.FC<ReviewFormProps> = ({ productId, onSubmit }) => { // Add productId here
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const { user } = useAuth();
@@ -18,7 +19,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ onSubmit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (user) {
-      onSubmit({ rating, comment });
+      onSubmit({ productId, rating, comment }); // Include productId here
       setRating(0);
       setComment('');
     }

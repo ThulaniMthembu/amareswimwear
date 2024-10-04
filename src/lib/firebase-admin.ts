@@ -1,5 +1,5 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getDatabase } from 'firebase-admin/database'
+import { getFirestore } from 'firebase-admin/firestore'
 
 let serviceAccount;
 
@@ -24,6 +24,6 @@ if (!getApps().length) {
   })
 }
 
-const adminDb = getDatabase()
+const db = getFirestore()
 
-export { adminDb }
+export { db }

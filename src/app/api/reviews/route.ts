@@ -1,28 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getFirestore } from 'firebase-admin/firestore'
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
+import { db } from '@/lib/firebase-admin'
 import { Review } from '@/types'
 
-// Initialize Firebase Admin SDK
-if (!getApps().length) {
-  try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}')
-    if (!serviceAccount.project_id) {
-      throw new Error('Invalid service account: missing project_id')
-    }
-    initializeApp({
-      credential: cert(serviceAccount)
-    })
-    console.log('Firebase Admin SDK initialized successfully')
-  } catch (error) {
-    console.error('Failed to initialize Firebase Admin:', error)
-    throw error // This will cause the API route to fail if Firebase can't be initialized
-  }
-}
-
-const db = getFirestore()
-
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const productId = searchParams.get('productId')
@@ -31,17 +11,21 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 })
     }
 
-    const snapshot = await db.collection('reviews').where('productId', '==', productId).get()
+    console.log(`Fetching reviews for product ${productId}`)
+
+    const snapshot = await db.collection('reviews').where('productId', '==', parseInt(productId)).get()
     const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review))
+
+    console.log(`Found ${reviews.length} reviews for product ${productId}`)
 
     return NextResponse.json(reviews)
   } catch (error) {
     console.error("Error in GET /api/reviews:", error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal Server Error', details: (error as Error).message }, { status: 500 })
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json()
     const { productId, review } = body
@@ -50,18 +34,48 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Product ID and review are required' }, { status: 400 })
     }
 
+    console.log('Received review:', review)
+
     const newReview: Omit<Review, 'id'> = {
       ...review,
-      productId,
+      productId: parseInt(productId),
       createdAt: new Date().toISOString()
     }
+
+    console.log('Saving review:', newReview)
 
     const docRef = await db.collection('reviews').add(newReview)
     const createdReview: Review = { id: docRef.id, ...newReview }
 
+    console.log('Review saved successfully:', createdReview)
+
     return NextResponse.json(createdReview, { status: 201 })
   } catch (error) {
     console.error("Error in POST /api/reviews:", error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal Server Error', details: (error as Error).message }, { status: 500 })
   }
+}
+
+function corsMiddleware(handler: (request: Request) => Promise<NextResponse>) {
+  return async (request: Request) => {
+    const response = await handler(request)
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+    return response
+  }
+}
+
+export const GET = corsMiddleware(handleGET)
+export const POST = corsMiddleware(handlePOST)
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  })
 }
