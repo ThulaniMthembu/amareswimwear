@@ -2,11 +2,16 @@ import NextAuth, { NextAuthOptions, Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
+
+// Extend the User type to include hashedPassword
+interface ExtendedUser extends User {
+  hashedPassword?: string;
+}
 
 const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -30,21 +35,15 @@ const authOptions: NextAuthOptions = {
           where: {
             email: credentials.email,
           },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            password: true,
-          },
-        });
+        }) as ExtendedUser | null;
         
-        if (!user || !user.password) {
+        if (!user || !user.hashedPassword) {
           return null;
         }
 
         const isCorrectPassword = await bcrypt.compare(
           credentials.password,
-          user.password
+          user.hashedPassword
         );
 
         if (!isCorrectPassword) {

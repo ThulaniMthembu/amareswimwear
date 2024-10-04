@@ -1,0 +1,10 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://amareswimwear.com
+
+# Sitemaps
+Sitemap: https://amareswimwear.com/sitemap.xml
+Sitemap: https://amareswimwear.com/server-sitemap.xml
