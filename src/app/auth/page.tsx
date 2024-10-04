@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, AuthError, OAuthProvider } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import { useAuth } from '@/contexts/AuthContext'
+import { createUserProfile } from '@/utils/user'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -95,6 +96,7 @@ const AuthPage: React.FC = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await sendEmailVerification(userCredential.user)
+      await createUserProfile(userCredential.user)
       setSuccessMessage('Account created successfully. Please check your email for verification.')
       const redirect = searchParams.get('redirect')
       if (redirect) {
@@ -139,7 +141,8 @@ const AuthPage: React.FC = () => {
     setIsLoading(true)
     const provider = new GoogleAuthProvider()
     try {
-      await signInWithPopup(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      await createUserProfile(result.user)
       const redirect = searchParams.get('redirect')
       if (redirect) {
         router.push(`/${redirect}`)
@@ -160,7 +163,8 @@ const AuthPage: React.FC = () => {
     setIsLoading(true)
     const provider = new OAuthProvider('apple.com')
     try {
-      await signInWithPopup(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      await createUserProfile(result.user)
       const redirect = searchParams.get('redirect')
       if (redirect) {
         router.push(`/${redirect}`)
