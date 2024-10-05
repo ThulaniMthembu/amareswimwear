@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, AuthError } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, AuthError } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import { useAuth } from '@/contexts/AuthContext'
 import { createUserProfile } from '@/utils/user'
@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FcGoogle } from 'react-icons/fc'
-import { FaFacebook } from 'react-icons/fa'
 import Navbar from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter'
@@ -161,28 +160,6 @@ const AuthPage: React.FC = () => {
     } catch (error) {
       const authError = error as AuthError
       toast.error(authError.message || 'Failed to sign in with Google. Please try again.')
-      console.error(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleFacebookSignIn = async () => {
-    setSuccessMessage('')
-    setIsLoading(true)
-    const provider = new FacebookAuthProvider()
-    try {
-      const result = await signInWithPopup(auth, provider)
-      await createUserProfile(result.user)
-      const redirect = searchParams.get('redirect')
-      if (redirect) {
-        router.push(`/${redirect}`)
-      } else {
-        router.push('/profile')
-      }
-    } catch (error) {
-      const authError = error as AuthError
-      toast.error(authError.message || 'Failed to sign in with Facebook. Please try again.')
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -380,26 +357,15 @@ const AuthPage: React.FC = () => {
           </CardContent>
           <CardFooter className="flex-col space-y-4">
             <p className="p line">Or With</p>
-            <div className="flex justify-between w-full">
-              <Button 
-                onClick={handleGoogleSignIn} 
-                variant="outline" 
-                className="btn google w-[48%]"
-                disabled={isLoading}
-              >
-                <FcGoogle className="mr-2 h-4 w-4" />
-                Google
-              </Button>
-              <Button 
-                onClick={handleFacebookSignIn} 
-                variant="outline" 
-                className="btn facebook w-[48%]"
-                disabled={isLoading}
-              >
-                <FaFacebook className="mr-2 h-4 w-4 text-blue-600" />
-                Facebook
-              </Button>
-            </div>
+            <Button 
+              onClick={handleGoogleSignIn} 
+              variant="outline" 
+              className="w-full h-10 px-4 py-2 border border-gray-300 rounded-md text-black bg-white hover:bg-[#4285F4] hover:text-white transition-colors duration-300 flex items-center justify-center"
+              disabled={isLoading}
+            >
+              <FcGoogle className="mr-2 h-5 w-5" />
+              Sign in with Google
+            </Button>
           </CardFooter>
         </Card>
       </main>
