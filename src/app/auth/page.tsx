@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, AuthError } from 'firebase/auth'
@@ -17,7 +17,6 @@ import Navbar from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter'
 import toast, { Toaster } from 'react-hot-toast'
-import ReCAPTCHA from "react-google-recaptcha"
 import { Eye, EyeOff } from 'lucide-react'
 
 const AuthPage: React.FC = () => {
@@ -27,10 +26,8 @@ const AuthPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false)
-  const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
   const router = useRouter()
   const { user, loading } = useAuth()
   const searchParams = useSearchParams()
@@ -73,12 +70,6 @@ const AuthPage: React.FC = () => {
     setSuccessMessage('')
     setIsLoading(true)
 
-    if (!recaptchaValue) {
-      toast.error('Please complete the reCAPTCHA verification.')
-      setIsLoading(false)
-      return
-    }
-
     const passwordError = validatePassword(password)
     if (passwordError) {
       toast.error(passwordError)
@@ -109,8 +100,6 @@ const AuthPage: React.FC = () => {
       console.error(error)
     } finally {
       setIsLoading(false)
-      recaptchaRef.current?.reset()
-      setRecaptchaValue(null)
     }
   }
 
@@ -118,12 +107,6 @@ const AuthPage: React.FC = () => {
     e.preventDefault()
     setSuccessMessage('')
     setIsLoading(true)
-
-    if (!recaptchaValue) {
-      toast.error('Please complete the reCAPTCHA verification.')
-      setIsLoading(false)
-      return
-    }
 
     try {
       await signInWithEmailAndPassword(auth, email, password)
@@ -139,8 +122,6 @@ const AuthPage: React.FC = () => {
       console.error(error)
     } finally {
       setIsLoading(false)
-      recaptchaRef.current?.reset()
-      setRecaptchaValue(null)
     }
   }
 
@@ -255,15 +236,7 @@ const AuthPage: React.FC = () => {
                     </div>
                     <Link href="/reset-password" className="span">Forgot password?</Link>
                   </div>
-                  <ReCAPTCHA
-  ref={recaptchaRef}
-  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
-  onChange={(value: string | null) => {
-    console.log("reCAPTCHA value:", value);
-    setRecaptchaValue(value);
-  }}
-/>
-                  <Button type="submit" className="button-submit" disabled={isLoading || !recaptchaValue}>
+                  <Button type="submit" className="button-submit" disabled={isLoading}>
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </form>
@@ -345,12 +318,7 @@ const AuthPage: React.FC = () => {
                     </Button>
                   </div>
                   <PasswordStrengthMeter password={password} />
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
-                    onChange={(value: string | null) => setRecaptchaValue(value)}
-                  />
-                  <Button type="submit" className="button-submit" disabled={isLoading || !recaptchaValue}>
+                  <Button type="submit" className="button-submit" disabled={isLoading}>
                     {isLoading ? 'Signing Up...' : 'Sign Up'}
                   </Button>
                 </form>
