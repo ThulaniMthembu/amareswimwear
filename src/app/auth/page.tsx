@@ -256,10 +256,13 @@ const AuthPage: React.FC = () => {
                     <Link href="/reset-password" className="span">Forgot password?</Link>
                   </div>
                   <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
-                    onChange={(value: string | null) => setRecaptchaValue(value)}
-                  />
+  ref={recaptchaRef}
+  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+  onChange={(value: string | null) => {
+    console.log("reCAPTCHA value:", value);
+    setRecaptchaValue(value);
+  }}
+/>
                   <Button type="submit" className="button-submit" disabled={isLoading || !recaptchaValue}>
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </Button>

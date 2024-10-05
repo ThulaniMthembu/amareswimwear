@@ -24,6 +24,7 @@ const Navbar: React.FC = () => {
   const [cartItemCount, setCartItemCount] = useState(0)
   const { user } = useAuth()
   const menuRef = useRef<HTMLDivElement>(null)
+  const [isSigningOut, setIsSigningOut] = useState(false)
 
   useEffect(() => {
     setCartItemCount(cart.reduce((total, item) => total + item.quantity, 0))
@@ -58,10 +59,14 @@ const Navbar: React.FC = () => {
   }
 
   const handleSignOut = async () => {
+    setIsSigningOut(true)
     try {
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Delay for animation
       await signOut(auth)
     } catch (error) {
       console.error('Failed to sign out', error)
+    } finally {
+      setIsSigningOut(false)
     }
   }
 
@@ -90,15 +95,25 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center">
           {user ? (
-            <div className="flex items-center ml-4">
-              <Link href="/profile" className="text-sm font-medium hover:text-[#e87167]">
+            <motion.div 
+              className="flex items-center ml-4"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: isSigningOut ? 0 : 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Link href="/profile" className="text-sm font-medium hover:text-[#e87167] mr-2">
                 {user.displayName || 'User'}
               </Link>
-              <Button variant="ghost" size="icon" onClick={handleSignOut} className="ml-2">
-                <LogOut className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+              >
+                <LogOut className={`h-5 w-5 ${isSigningOut ? 'animate-spin' : ''}`} />
                 <span className="sr-only">Sign out</span>
               </Button>
-            </div>
+            </motion.div>
           ) : (
             <Link href="/auth" className="ml-4">
               <Button variant="ghost" size="icon">
@@ -110,7 +125,7 @@ const Navbar: React.FC = () => {
           <Button variant="ghost" size="icon" onClick={toggleCart} className="relative ml-4">
             <ShoppingBag className="h-6 w-6" />
             {cartItemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs" style={{ marginRight: '10px' }}>
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                 {cartItemCount}
               </span>
             )}
@@ -129,7 +144,7 @@ const Navbar: React.FC = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed top-0 right-0 w-1/2 h-full bg-[#fafaff] shadow-lg z-50 overflow-y-auto"
+            className="fixed top-0 right-0 w-full sm:w-1/2 h-full bg-[#fafaff] shadow-lg z-50 overflow-y-auto"
           >
             <div className="flex flex-col h-full p-4">
               <div className="flex justify-end">
@@ -154,14 +169,26 @@ const Navbar: React.FC = () => {
                     {item.name}
                   </Link>
                 ))}
-                {user && (
-                  <Link href="/profile" className="text-lg hover:text-[#e87167]" onClick={toggleMenu}>Profile</Link>
-                )}
                 {user ? (
-                  <Button variant="ghost" onClick={handleSignOut} className="justify-start p-0 hover:text-[#e87167]">
-                    <LogOut className="h-6 w-6 mr-2" />
-                    Sign out
-                  </Button>
+                  <motion.div 
+                    className="flex items-center justify-between"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: isSigningOut ? 0 : 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Link href="/profile" className="text-lg hover:text-[#e87167]" onClick={toggleMenu}>
+                      {user.displayName || 'User'}
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleSignOut} 
+                      className="p-0 hover:text-[#e87167]"
+                      disabled={isSigningOut}
+                    >
+                      <LogOut className={`h-6 w-6 ${isSigningOut ? 'animate-spin' : ''}`} />
+                      <span className="sr-only">Sign out</span>
+                    </Button>
+                  </motion.div>
                 ) : (
                   <Link href="/auth" onClick={toggleMenu}>
                     <Button variant="ghost" className="justify-start p-0 hover:text-[#e87167]">
