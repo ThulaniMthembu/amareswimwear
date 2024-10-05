@@ -318,9 +318,6 @@ const HomePage: React.FC = () => {
 								<source src='/video/video.mp4' type='video/mp4' />
 								Your browser does not support the video tag.
 							</video>
-							<p className='text-xs text-gray-500 mt-2 text-right'>
-								Video: pexels.com by RDNE Stock project
-							</p>
 						</div>
 					</div>
 				</section>
