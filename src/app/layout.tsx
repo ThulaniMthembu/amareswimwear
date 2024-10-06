@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useState, useEffect } from 'react'
 import { Inter } from 'next/font/google'
 import { Toaster } from '@/components/ui/toaster'
 import { CartProvider } from '@/contexts/CartContext'
@@ -21,14 +23,29 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate initial loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2000) // Adjust this value to control how long the loader is shown
+
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
           <CartProvider>
-            <Suspense fallback={<Loader />}>
-              {children}
-            </Suspense>
+            {isLoading ? (
+              <Loader />
+            ) : (
+              <Suspense fallback={<Loader />}>
+                {children}
+              </Suspense>
+            )}
             <Toaster />
           </CartProvider>
         </AuthProvider>
