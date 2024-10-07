@@ -52,7 +52,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-[#daddd8] pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-[#1c1c1c]">&copy; {new Date().getFullYear()} Amare Swimwear. All rights reserved.</p>
+          <p className="text-[#1c1c1c]">&copy; {new Date().getFullYear()} Amare Swim Resort. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link href="/privacy-policy" className="text-[#1c1c1c] hover:text-[#e87167]">Privacy Policy</Link>
             <Link href="/terms-of-service" className="text-[#1c1c1c] hover:text-[#e87167]">Terms of Service</Link>

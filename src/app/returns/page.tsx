@@ -12,7 +12,7 @@ export default function ReturnsPage() {
       <main className="flex-grow container mx-auto px-4 py-8 md:py-16 text-black">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">Returns and Exchanges Policy</h1>
         <p className="mb-8 text-center max-w-2xl mx-auto">
-          At AMERE, we prioritize hygiene and customer satisfaction. Please review our policy below to understand how returns and exchanges are handled.
+          At Amare Swim Resort, we prioritize hygiene and customer satisfaction. Please review our policy below to understand how returns and exchanges are handled.
         </p>
 
         <div className="grid gap-8 md:grid-cols-2">
@@ -69,7 +69,7 @@ export default function ReturnsPage() {
               <CardTitle className="text-black">5. Return Shipping</CardTitle>
             </CardHeader>
             <CardContent className="text-black">
-              <p>If the return is due to a defect or damage, AMERE Swim Wear will cover the return shipping costs.</p>
+              <p>If the return is due to a defect or damage, Amare Swim Resort will cover the return shipping costs.</p>
             </CardContent>
           </Card>
 

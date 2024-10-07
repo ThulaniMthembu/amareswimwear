@@ -437,7 +437,7 @@ const HomePage: React.FC = () => {
 									transition={{ duration: 0.5 }}
 									className='text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4 text-[#1c1c1c]'
 								>
-									About Amare Swimwear
+									About Amare Swim Resort
 								</motion.h2>
 								<motion.p
 									initial={{ opacity: 0, y: 20 }}
@@ -445,7 +445,7 @@ const HomePage: React.FC = () => {
 									transition={{ duration: 0.5, delay: 0.1 }}
 									className='text-[#1c1c1c] mb-4'
 								>
-									Amare Swimwear was born from a passion to empower women of all
+									Amare Swim Resort was born from a passion to empower women of all
 									shapes and sizes. Our journey began with a simple idea: every
 									woman deserves to feel confident, beautiful, and comfortable
 									in her swimwear.
@@ -465,7 +465,7 @@ const HomePage: React.FC = () => {
 							<div>
 								<Image
 									src='/images/CEO.jpg'
-									alt='About Amare Swimwear'
+									alt='About Amare Swim Resort'
 									width={600}
 									height={400}
 									className='rounded-lg shadow-md'
@@ -491,7 +491,7 @@ const HomePage: React.FC = () => {
 								and confidence.&quot;
 							</p>
 							<p className='mt-4 text-[#1c1c1c] font-semibold'>
-								- Zoe Kavinsky, CEO of Amare Swimwear
+								- Zoe Kavinsky, CEO of Amare Swim Resort
 							</p>
 						</motion.div>
 					</div>
@@ -549,11 +549,11 @@ const HomePage: React.FC = () => {
 				<DialogContent className='bg-[#fafaff]'>
 					<DialogHeader>
 						<DialogTitle className='text-[#1c1c1c]'>
-							Welcome to Amare Swimwear!
+							Welcome to Amare Swim Resort!
 						</DialogTitle>
 					</DialogHeader>
 					<p className='text-[#1c1c1c]'>
-						Thank you for visiting Amare Swimwear. We&apos;re excited to have
+						Thank you for visiting Amare Swim Resort. We&apos;re excited to have
 						you here! Discover our collection of beautiful, comfortable swimwear
 						designed to make you feel confident and empowered.
 					</p>

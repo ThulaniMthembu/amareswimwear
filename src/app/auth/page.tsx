@@ -177,7 +177,7 @@ const AuthPage: React.FC = () => {
       <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
         <Card className="w-full max-w-md auth-form">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center text-[#1c1c1c]">Welcome to Amare Swimwear</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center text-[#1c1c1c]">Welcome to Amare Swim Resort</CardTitle>
             <CardDescription className="text-center text-[#4a4a4a]">Sign in or create an account to continue</CardDescription>
           </CardHeader>
           <CardContent>

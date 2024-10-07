@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
       <main className="flex-grow container mx-auto px-4 py-8 md:py-16 text-black">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">Privacy Policy</h1>
         <p className="mb-8 text-center max-w-2xl mx-auto">
-          At AMERE Swim Wear, your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you interact with our website or services.
+          At Amare Swim Resort, your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you interact with our website or services.
         </p>
 
         <div className="space-y-8">

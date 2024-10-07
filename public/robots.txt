@@ -3,8 +3,8 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://amareswimwear.com
+Host: https://amareswimwear.vercel.app
 
 # Sitemaps
-Sitemap: https://amareswimwear.com/sitemap.xml
-Sitemap: https://amareswimwear.com/server-sitemap.xml
+Sitemap: https://amareswimwear.vercel.app/sitemap.xml
+Sitemap: https://amareswimwear.vercel.app/server-sitemap.xml

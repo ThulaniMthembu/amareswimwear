@@ -12,7 +12,7 @@ export default function ShippingPage() {
       <main className="flex-grow container mx-auto px-4 py-8 md:py-16 text-black">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">Shipping Information</h1>
         <p className="mb-8 text-center max-w-2xl mx-auto">
-          At AMERE Swim Wear, we aim to deliver your orders as quickly and securely as possible. Here&apos;s everything you need to know about our shipping process:
+          At Amare Swim Resort, we aim to deliver your orders as quickly and securely as possible. Here&apos;s everything you need to know about our shipping process:
         </p>
 
         <div className="grid gap-8 md:grid-cols-2">
@@ -104,7 +104,7 @@ export default function ShippingPage() {
               <CardTitle className="text-black">8. Delivery Issues</CardTitle>
             </CardHeader>
             <CardContent className="text-black">
-              <p>If your package is delayed, lost, or arrives damaged, please reach out to our customer service team at support@amereswimwear.com. We will work to resolve the issue promptly. You may need to provide your order number and tracking information to assist us in helping you quickly.</p>
+              <p>If your package is delayed, lost, or arrives damaged, please reach out to our customer service team at amareresortwear@gmail.com. We will work to resolve the issue promptly. You may need to provide your order number and tracking information to assist us in helping you quickly.</p>
             </CardContent>
           </Card>
         </div>

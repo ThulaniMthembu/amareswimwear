@@ -12,7 +12,7 @@ export default function TermsOfServicePage() {
       <main className="flex-grow container mx-auto px-4 py-8 md:py-16 text-black">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">Terms of Service</h1>
         <p className="mb-8 text-center max-w-2xl mx-auto">
-          Welcome to AMERE Swim Wear! By using our website, you agree to comply with and be bound by the following terms and conditions. Please read these Terms of Service carefully before accessing or using our services. If you do not agree with any part of these terms, you may not use our website or services.
+          Welcome to Amare Swim Resort! By using our website, you agree to comply with and be bound by the following terms and conditions. Please read these Terms of Service carefully before accessing or using our services. If you do not agree with any part of these terms, you may not use our website or services.
         </p>
 
         <div className="space-y-8">
@@ -64,7 +64,7 @@ export default function TermsOfServicePage() {
               <ul className="list-disc pl-5 space-y-2">
                 <li><strong>Shipping:</strong> We currently only ship within South Africa. Delivery times may vary depending on location and external factors. Please refer to our Shipping Policy for detailed information on delivery times and shipping rates.</li>
                 <li><strong>Ownership of Products:</strong> Once the product has been delivered to your specified address, ownership transfers to you. We are not responsible for any loss or damage that occurs after the product has been delivered.</li>
-                <li><strong>Delays:</strong> AMERE Swim Wear is not responsible for shipping delays caused by external factors such as weather, carrier issues, or customs clearance.</li>
+                <li><strong>Delays:</strong> Amare Swim Resort is not responsible for shipping delays caused by external factors such as weather, carrier issues, or customs clearance.</li>
               </ul>
             </CardContent>
           </Card>
@@ -84,8 +84,8 @@ export default function TermsOfServicePage() {
             </CardHeader>
             <CardContent className="text-black">
               <ul className="list-disc pl-5 space-y-2">
-                <li>All content on this website, including images, text, logos, graphics, and designs, is the property of AMERE Swim Wear and is protected by copyright, trademark, and other intellectual property laws.</li>
-                <li>You may not reproduce, distribute, or use any content from our website without prior written permission from AMERE Swim Wear.</li>
+                <li>All content on this website, including images, text, logos, graphics, and designs, is the property of Amare Swim Resort and is protected by copyright, trademark, and other intellectual property laws.</li>
+                <li>You may not reproduce, distribute, or use any content from our website without prior written permission from Amare Swim Resort.</li>
               </ul>
             </CardContent>
           </Card>
@@ -120,7 +120,7 @@ export default function TermsOfServicePage() {
             </CardHeader>
             <CardContent className="text-black">
               <ul className="list-disc pl-5 space-y-2">
-                <li>AMERE Swim Wear will not be liable for any direct, indirect, incidental, punitive, or consequential damages arising from your use of our site or products.</li>
+                <li>Amare Swim Resort will not be liable for any direct, indirect, incidental, punitive, or consequential damages arising from your use of our site or products.</li>
                 <li>Our liability is limited to the amount paid for the product in dispute. We do not guarantee that our services will be uninterrupted, secure, or error-free.</li>
               </ul>
             </CardContent>
@@ -131,7 +131,7 @@ export default function TermsOfServicePage() {
               <CardTitle className="text-black">10. Indemnification</CardTitle>
             </CardHeader>
             <CardContent className="text-black">
-              <p>You agree to indemnify and hold harmless AMERE Swim Wear and its affiliates, employees, and service providers from any claim or demand arising from your breach of these Terms of Service or your violation of any law or rights of a third party.</p>
+              <p>You agree to indemnify and hold harmless Amare Swim Resort and its affiliates, employees, and service providers from any claim or demand arising from your breach of these Terms of Service or your violation of any law or rights of a third party.</p>
             </CardContent>
           </Card>
 

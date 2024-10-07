@@ -8,9 +8,9 @@ interface SEOProps {
 }
 
 export function SEO({ title, description, canonical, ogImage }: SEOProps) {
-  const siteName = 'Amare Resort Wear'
+  const siteName = 'Amare Swim Resort'
   const fullTitle = `${title} | ${siteName}`
-  const defaultOgImage = 'https://amareswimwear.vercel.app/public/images/logo.png'
+  const defaultOgImage = 'https://amareswimwear.vercel.app/images/logo.png'
 
   return (
     <Head>
