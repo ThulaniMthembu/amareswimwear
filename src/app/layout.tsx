@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import { Toaster } from '@/components/ui/toaster'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
-import ClientLayout from './ClientLayout'
 import type { Metadata } from 'next'
 
 import './globals.css'
@@ -55,16 +54,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <AuthProvider>
           <CartProvider>
-            <ClientLayout>
-              <div className="container mx-auto px-4 py-8">
-                {children}
-              </div>
-              <Toaster />
-            </ClientLayout>
+            {children}
+            <Toaster />
           </CartProvider>
         </AuthProvider>
       </body>

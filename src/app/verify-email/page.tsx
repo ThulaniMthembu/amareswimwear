@@ -5,24 +5,30 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import Navbar from '@/components/Navbar'
-import { Footer } from '@/components/Footer'
 import { toast } from "@/components/ui/use-toast"
+import ClientLayout from '../ClientLayout'
 
 export default function VerifyEmail() {
-  const { user, loading, sendVerificationEmail } = useAuth()
+  const { user, loading, sendVerificationEmail, refreshUser } = useAuth()
   const router = useRouter()
   const [resendDisabled, setResendDisabled] = useState(false)
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/auth')
-      } else if (user.emailVerified) {
-        router.push('/profile')
+    const checkVerification = async () => {
+      if (!loading) {
+        if (!user) {
+          router.push('/auth')
+        } else {
+          await refreshUser()
+          if (user.emailVerified) {
+            router.push('/profile')
+          }
+        }
       }
     }
-  }, [user, loading, router])
+
+    checkVerification()
+  }, [user, loading, router, refreshUser])
 
   const handleResendVerification = async () => {
     if (resendDisabled) return
@@ -45,51 +51,43 @@ export default function VerifyEmail() {
     }
   }
 
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#fafaff]">
-        <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
+      <ClientLayout>
+        <div className="flex items-center justify-center min-h-screen bg-white">
           <p className="text-xl text-black">Loading...</p>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </ClientLayout>
     )
   }
 
-  if (!user) {
-    return null // This will be handled by the useEffect hook
-  }
-
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafaff]">
-      <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
-        <Card className="w-full max-w-md">
+    <ClientLayout>
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen bg-white">
+        <Card className="w-full max-w-md bg-white shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center text-black">Verify Your Email</CardTitle>
             <CardDescription className="text-center text-black">
-              We&apos;ve sent a verification email to your inbox. Please click the link in the email to verify your account.
+              We&apos;ve sent a verification email to:
             </CardDescription>
+            <p className="text-center font-medium text-black">{user.email}</p>
           </CardHeader>
           <CardContent className="text-center">
             <p className="mb-4 text-black">
-              If you haven&apos;t received the email, please check your spam folder or click the button below to resend the
-              verification email.
+              Please click the link in the email to verify your account. If you haven&apos;t received the email, please check your spam folder or click the button below to resend the verification email.
             </p>
           </CardContent>
           <CardFooter className="flex justify-center">
             <Button 
               onClick={handleResendVerification} 
               disabled={resendDisabled}
-              className="bg-black text-white hover:bg-gray-800"
+              className="bg-black text-white hover:bg-gray-800 disabled:bg-gray-400"
             >
               Resend Verification Email
             </Button>
           </CardFooter>
         </Card>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </ClientLayout>
   )
 }

@@ -22,6 +22,7 @@ interface AuthContextType {
   signOut: () => Promise<void>
   sendVerificationEmail: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -31,20 +32,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
+  const refreshUser = async () => {
+    if (auth.currentUser) {
+      await reload(auth.currentUser)
+      setUser({ ...auth.currentUser })
+    }
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Reload the user to get the latest email verification status
-        await reload(user)
-        setUser(user)
-        if (!user.emailVerified) {
-          router.push('/verify-email')
-        } else {
-          const currentPath = window.location.pathname
-          if (currentPath === '/verify-email' || currentPath === '/auth/action') {
-            router.push('/profile')
-          }
-        }
+        await refreshUser()
       } else {
         setUser(null)
       }
@@ -52,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })
 
     return () => unsubscribe()
-  }, [router])
+  }, [])
 
   const signUp = async (email: string, password: string) => {
     try {
@@ -113,7 +111,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signOut,
     sendVerificationEmail,
-    resetPassword
+    resetPassword,
+    refreshUser
   }
 
   return (
