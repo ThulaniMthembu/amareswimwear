@@ -127,31 +127,28 @@ export default function ShopPage() {
 	const memoizedProducts = useMemo(() => products, [products]);
 
 	const fetchReviews = useCallback(async () => {
-    try {
-      const updatedProducts = await Promise.all(memoizedProducts.map(async (product) => {
-        console.log(`Fetching reviews for product ${product.id}`) // New console log
-        const response = await fetch(`/api/reviews?productId=${product.id}`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        const reviews = await response.json()
-        console.log(`Fetched reviews for product ${product.id}:`, reviews) // New console log
-        return {
-          ...product,
-          reviews: Array.isArray(reviews) ? reviews : [],
-          averageRating: reviews.length > 0
-            ? reviews.reduce((sum: number, review: Review) => sum + review.rating, 0) / reviews.length
-            : 0
-        }
-      }))
-      console.log('Updated products with reviews:', updatedProducts) // New console log
-      setProducts(updatedProducts)
-      setError(null)
-    } catch (error) {
-      console.error("Failed to fetch reviews:", error)
-      setError("Failed to fetch reviews. Please try again later.")
-    }
-  }, [memoizedProducts])
+		try {
+			const updatedProducts = await Promise.all(memoizedProducts.map(async (product) => {
+				const response = await fetch(`/api/reviews?productId=${product.id}`)
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`)
+				}
+				const reviews = await response.json()
+				return {
+					...product,
+					reviews: Array.isArray(reviews) ? reviews : [],
+					averageRating: reviews.length > 0
+						? reviews.reduce((sum: number, review: Review) => sum + review.rating, 0) / reviews.length
+						: 0
+				}
+			}))
+			setProducts(updatedProducts)
+			setError(null)
+		} catch (error) {
+			console.error("Failed to fetch reviews:", error)
+			setError(`Failed to fetch reviews. Please try again later. Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+		}
+	}, [memoizedProducts])
 
 	useEffect(() => {
 		fetchReviews();
