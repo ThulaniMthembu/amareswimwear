@@ -4,7 +4,6 @@ import { Toaster } from '@/components/ui/toaster'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ClientLayout from './ClientLayout'
-import ProfileCompletionPrompt from '@/components/ProfileCompletionPrompt'
 import type { Metadata } from 'next'
 
 import './globals.css'
@@ -62,7 +61,6 @@ export default function RootLayout({
           <CartProvider>
             <ClientLayout>
               <div className="container mx-auto px-4 py-8">
-                <ProfileCompletionPrompt />
                 {children}
               </div>
               <Toaster />

@@ -50,7 +50,7 @@ export default function VerifyEmail() {
       <div className="flex flex-col min-h-screen bg-[#fafaff]">
         <Navbar />
         <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
-          <p className="text-xl text-[#1c1c1c]">Loading...</p>
+          <p className="text-xl text-black">Loading...</p>
         </main>
         <Footer />
       </div>
@@ -67,19 +67,23 @@ export default function VerifyEmail() {
       <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Verify Your Email</CardTitle>
-            <CardDescription className="text-center">
+            <CardTitle className="text-2xl font-bold text-center text-black">Verify Your Email</CardTitle>
+            <CardDescription className="text-center text-black">
               We&apos;ve sent a verification email to your inbox. Please click the link in the email to verify your account.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="mb-4">
+            <p className="mb-4 text-black">
               If you haven&apos;t received the email, please check your spam folder or click the button below to resend the
               verification email.
             </p>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <Button onClick={handleResendVerification} disabled={resendDisabled}>
+            <Button 
+              onClick={handleResendVerification} 
+              disabled={resendDisabled}
+              className="bg-black text-white hover:bg-gray-800"
+            >
               Resend Verification Email
             </Button>
           </CardFooter>

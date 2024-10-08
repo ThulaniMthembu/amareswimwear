@@ -8,7 +8,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendEmailVerification,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  reload
 } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import { useRouter } from 'next/navigation'
@@ -31,19 +32,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
-      setLoading(false)
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // Reload the user to get the latest email verification status
+        await reload(user)
+        setUser(user)
         if (!user.emailVerified) {
           router.push('/verify-email')
         } else {
           const currentPath = window.location.pathname
-          if (currentPath === '/verify-email') {
+          if (currentPath === '/verify-email' || currentPath === '/auth/action') {
             router.push('/profile')
           }
         }
+      } else {
+        setUser(null)
       }
+      setLoading(false)
     })
 
     return () => unsubscribe()
