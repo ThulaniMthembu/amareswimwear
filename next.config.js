@@ -5,21 +5,14 @@ const nextConfig = {
 		remotePatterns: [
 			{
 				protocol: 'https',
-				hostname: 'sandbox.payfast.co.za',
-			},
-			{
-				protocol: 'https',
-				hostname: 'www.payfast.co.za',
-			},
-			{
-				protocol: 'https',
 				hostname: 'firebasestorage.googleapis.com',
 			},
 		],
 	},
 	reactStrictMode: true,
-	env: {
-		PAYFAST_PASSPHRASE: process.env.PAYFAST_PASSPHRASE,
+	swcMinify: true, // Enable SWC minification for improved performance
+	compiler: {
+		removeConsole: process.env.NODE_ENV === 'production', // Remove console.log in production
 	},
 };
 

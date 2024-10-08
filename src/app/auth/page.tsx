@@ -23,6 +23,9 @@ const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false)
@@ -65,10 +68,27 @@ const AuthPage: React.FC = () => {
     return null
   }
 
+  const validatePhoneNumber = (phone: string) => {
+    const phoneRegex = /^\+?[\d\s-]{10,}$/
+    return phoneRegex.test(phone)
+  }
+
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setSuccessMessage('')
     setIsLoading(true)
+
+    if (!firstName.trim() || !lastName.trim()) {
+      toast.error('Please enter your first and last name.')
+      setIsLoading(false)
+      return
+    }
+
+    if (!validatePhoneNumber(phoneNumber)) {
+      toast.error('Please enter a valid phone number.')
+      setIsLoading(false)
+      return
+    }
 
     const passwordError = validatePassword(password)
     if (passwordError) {
@@ -85,15 +105,18 @@ const AuthPage: React.FC = () => {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      await sendEmailVerification(userCredential.user)
-      await createUserProfile(userCredential.user)
+      await sendEmailVerification(userCredential.user, {
+        url: 'https://amareswimwear.vercel.app/auth?action=verifyEmail',
+        handleCodeInApp: true,
+      })
+      await createUserProfile({
+        ...userCredential.user,
+        displayName: `${firstName} ${lastName}`,
+        phoneNumber: phoneNumber
+      })
       setSuccessMessage('Account created successfully. Please check your email for verification.')
-      const redirect = searchParams.get('redirect')
-      if (redirect) {
-        router.push(`/${redirect}`)
-      } else {
-        router.push('/profile')
-      }
+      toast.success('Account created successfully. Please check your email for verification.')
+      router.push('/verify-email')
     } catch (error) {
       const authError = error as AuthError
       toast.error(authError.message || 'Failed to create an account. Please try again.')
@@ -147,12 +170,36 @@ const AuthPage: React.FC = () => {
     }
   }
 
+  const formatPhoneNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, '')
+    let formatted = cleaned
+    if (cleaned.length > 0) {
+      if (cleaned.length <= 3) {
+        formatted = cleaned
+      } else if (cleaned.length <= 6) {
+        formatted = `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
+      } else {
+        formatted = `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`
+      }
+    }
+    return formatted
+  }
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value)
+    setPhoneNumber(formatted)
+  }
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
   }
 
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword)
+  }
+
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1)
   }
 
   if (loading) {
@@ -243,6 +290,49 @@ const AuthPage: React.FC = () => {
               </TabsContent>
               <TabsContent value="signup">
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
+                  <div className="inputForm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <Input
+                      type="text"
+                      placeholder="Enter your First Name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(capitalizeFirstLetter(e.target.value))}
+                      required
+                      
+                      className="input"
+                    />
+                  </div>
+                  <div className="inputForm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <Input
+                      type="text"
+                      placeholder="Enter your Last Name"
+                      value={lastName}
+                      onChange={(e) => setLastName(capitalizeFirstLetter(e.target.value))}
+                      required
+                      className="input"
+                    />
+                  </div>
+                  <div className="inputForm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    <Input
+                      type="tel"
+                      placeholder="Enter your Phone Number"
+                      value={phoneNumber}
+                      onChange={handlePhoneNumberChange}
+                      required
+                      className="input"
+                      pattern="[0-9\-]+"
+                    />
+                  </div>
                   <div className="inputForm">
                     <svg height="20" viewBox="0 0 32 32" width="20" xmlns="http://www.w3.org/2000/svg">
                       <g id="Layer_3" data-name="Layer 3">

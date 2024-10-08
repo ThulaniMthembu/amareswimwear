@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ClientLayout from './ClientLayout'
+import ProfileCompletionPrompt from '@/components/ProfileCompletionPrompt'
 import type { Metadata } from 'next'
 
 import './globals.css'
@@ -39,11 +40,14 @@ export const metadata: Metadata = {
     creator: '@AmareSwimsResort',
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180' },
+    ],
   },
-  manifest: '/site.webmanifest',
 }
 
 export default function RootLayout({
@@ -57,9 +61,12 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <ClientLayout>
-              {children}
+              <div className="container mx-auto px-4 py-8">
+                <ProfileCompletionPrompt />
+                {children}
+              </div>
+              <Toaster />
             </ClientLayout>
-            <Toaster />
           </CartProvider>
         </AuthProvider>
       </body>

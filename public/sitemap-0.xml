@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://amareswimwear.vercel.app/contact</loc><lastmod>2024-10-08T06:15:22.549Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/blog</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/payment-cancelled</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/payment-success</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/auth</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/privacy-policy</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/reset-password</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/returns</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/profile</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/terms-of-service</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/shipping</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/checkout</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/faqs</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://amareswimwear.vercel.app/shop</loc><lastmod>2024-10-08T06:15:22.552Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/payment-cancelled</loc><lastmod>2024-10-08T21:29:21.494Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/payment-success</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/privacy-policy</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/profile</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/reset-password</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/auth</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/returns</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/shipping</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/terms-of-service</loc><lastmod>2024-10-08T21:29:21.495Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/faqs</loc><lastmod>2024-10-08T21:29:21.496Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/verify-email</loc><lastmod>2024-10-08T21:29:21.496Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/blog</loc><lastmod>2024-10-08T21:29:21.496Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/shop</loc><lastmod>2024-10-08T21:29:21.496Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/contact</loc><lastmod>2024-10-08T21:29:21.496Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://amareswimwear.vercel.app/checkout</loc><lastmod>2024-10-08T21:29:21.496Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>

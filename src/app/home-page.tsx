@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -28,6 +28,12 @@ type CustomerReview = {
   review: string;
   product: string;
   platform: string;
+};
+
+type FeaturedProduct = {
+  name: string;
+  price: number;
+  image: string;
 };
 
 const heroContent: HeroContent[] = [
@@ -81,7 +87,7 @@ const customerReviews: CustomerReview[] = [
   },
 ];
 
-const featuredProducts = [
+const featuredProducts: FeaturedProduct[] = [
   {
     name: 'Pink Sapphire Swimsuit',
     price: 650.0,
@@ -144,7 +150,7 @@ const HomePage: React.FC = () => {
         await Promise.all(
           heroContent.map((content) => {
             return new Promise<void>((resolve, reject) => {
-              const img = new (window.Image as { new (): HTMLImageElement })();
+              const img = new window.Image();
               img.src = content.image;
               img.onload = () => resolve();
               img.onerror = reject;
@@ -154,11 +160,34 @@ const HomePage: React.FC = () => {
         setImagesLoaded(true);
       } catch (err) {
         console.error('Failed to load images', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to load images. Please refresh the page.',
+          variant: 'destructive',
+        });
       }
     };
 
     loadImages();
-  }, []);
+  }, [toast]);
+
+  const handleVideoEnd = useCallback(() => {
+    if (videoRef.current) {
+      if (videoRef.current.src.endsWith('video.mp4')) {
+        videoRef.current.src = '/video/video2.mp4';
+      } else {
+        videoRef.current.src = '/video/video.mp4';
+      }
+      videoRef.current.play().catch(error => {
+        console.error('Error playing video:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to play video. Please refresh the page.',
+          variant: 'destructive',
+        });
+      });
+    }
+  }, [toast]);
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -170,33 +199,32 @@ const HomePage: React.FC = () => {
         videoElement.removeEventListener('ended', handleVideoEnd);
       }
     };
-  }, []);
-
-  const handleVideoEnd = () => {
-    if (videoRef.current) {
-      if (videoRef.current.src.endsWith('video.mp4')) {
-        videoRef.current.src = '/video/video2.mp4';
-      } else {
-        videoRef.current.src = '/video/video.mp4';
-      }
-      videoRef.current.play();
-    }
-  };
+  }, [handleVideoEnd]);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubscribing(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    console.log('Subscribed:', email);
-    toast({
-      title: 'Thank you for subscribing!',
-      description: "You'll receive our latest updates and offers soon.",
-    });
-    setEmail('');
-    setIsSubscribing(false);
+      console.log('Subscribed:', email);
+      toast({
+        title: 'Thank you for subscribing!',
+        description: "You'll receive our latest updates and offers soon.",
+      });
+      setEmail('');
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast({
+        title: 'Subscription failed',
+        description: 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
@@ -219,10 +247,10 @@ const HomePage: React.FC = () => {
                 <div className='relative w-full h-full'>
                   <Image
                     src={heroContent[currentHeroIndex].image}
-                    alt="Hero image"
+                    alt={`Hero image - ${heroContent[currentHeroIndex].title}`}
                     fill
                     priority
-                    className="w-full h-full object-cover object-top sm:object-center md:object-[center_30%] lg:object-[center_40%]"
+                    className='w-full h-full object-cover object-top sm:object-center md:object-[center_30%] lg:object-[center_40%]'
                     sizes="100vw"
                   />
                   <div className='absolute inset-0 bg-black bg-opacity-50' />
@@ -342,16 +370,18 @@ const HomePage: React.FC = () => {
                     width={300}
                     height={400}
                     className='object-cover w-full h-[300px] transition-transform group-hover:scale-105'
+                    sizes="(max-width: 640px) 
+
+ 100vw, (max-width: 768px) 50vw, 25vw"
                   />
                   <div className='absolute inset-0 bg-black bg-opacity-40 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center'>
                     <Button
                       variant='secondary'
                       asChild
-                      className='bg-[#fafaff] text-[#1c1c1c] 
-                      hover:bg-[#e87167]'
+                      className='bg-[#fafaff] text-[#1c1c1c] hover:bg-[#e87167]'
                     >
                       <Link href='/shop'>
-                        <ShoppingBag className='mr-2  h-4 w-4' />
+                        <ShoppingBag className='mr-2 h-4 w-4' />
                         Shop Now
                       </Link>
                     </Button>
@@ -440,10 +470,10 @@ const HomePage: React.FC = () => {
                   transition={{ duration: 0.5, delay: 0.1 }}
                   className='text-[#1c1c1c] mb-4'
                 >
-                  Amare Swim Resort was born from a passion to empower women of all
-                  shapes and sizes. Our journey began with a simple idea: every
-                  woman deserves to feel confident, beautiful, and comfortable
-                  in her swimwear.
+                  Amare Swim Resort was born from a passion to empower women of
+                  all shapes and sizes. Our journey began with a simple idea:
+                  every woman deserves to feel confident, beautiful, and
+                  comfortable in her swimwear.
                 </motion.p>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
@@ -460,10 +490,10 @@ const HomePage: React.FC = () => {
               <div>
                 <Image
                   src='/images/CEO.jpg'
-                  alt='About Amare Swim Resort'
+                  alt='CEO of Amare Swim Resort'
                   width={600}
                   height={400}
-                  className='rounded-lg shadow-md'
+                  className='w-full h-auto object-cover rounded-lg shadow-md'
                 />
               </div>
             </div>
@@ -517,7 +547,9 @@ const HomePage: React.FC = () => {
                 onSubmit={handleSubscribe}
                 className='w-full max-w-sm space-y-2 mt-6'
               >
+                <label htmlFor="email-input" className="sr-only">Email address</label>
                 <Input
+                  id="email-input"
                   type='email'
                   placeholder='Enter your email'
                   value={email}

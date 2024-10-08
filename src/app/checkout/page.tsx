@@ -22,28 +22,14 @@ import Navbar from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 
 interface UserProfile {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   phone: string
   address: string
   city: string
   postalCode: string
   province: string
-}
-
-interface PayFastData {
-  merchant_id: string
-  merchant_key: string
-  return_url: string
-  cancel_url: string
-  notify_url: string
-  name_first: string
-  name_last: string
-  email_address: string
-  cell_number: string
-  m_payment_id: string
-  amount: string
-  item_name: string
 }
 
 export default function CheckoutPage() {
@@ -102,95 +88,43 @@ export default function CheckoutPage() {
   const subtotal = calculateTotal()
   const totalAmount = subtotal + shippingCost - discount
 
-  const handleProceedToPayFast = async () => {
-    console.log('Proceed to PayFast button clicked')
-
+  const handleSubmitOrder = async () => {
     if (cart.length === 0) {
       setError("Your cart is empty. Please add items before proceeding to checkout.")
-      console.log('Error: Cart is empty')
       return
     }
 
     if (!agreeToTerms) {
       setError("Please agree to the terms and conditions before proceeding.")
-      console.log('Error: Terms and conditions not agreed')
       return
     }
 
     if (!cardNumber || !cardExpiry || !cardCVC || !cardHolder) {
       setError("Please fill in all card details before proceeding.")
-      console.log('Error: Incomplete card details')
       return
     }
 
     setIsSubmitting(true)
     setError(null)
 
-    console.log('Validations passed, preparing PayFast data')
-
-    const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    console.log('Generated order ID:', orderId)
-
-    const payFastData: PayFastData = {
-      merchant_id: process.env.NEXT_PUBLIC_PAYFAST_MERCHANT_ID || '',
-      merchant_key: process.env.NEXT_PUBLIC_PAYFAST_MERCHANT_KEY || '',
-      return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-cancelled`,
-      notify_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payment-notification`,
-      name_first: profile?.name.split(' ')[0] || '',
-      name_last: profile?.name.split(' ').slice(1).join(' ') || '',
-      email_address: profile?.email || '',
-      cell_number: profile?.phone || '',
-      m_payment_id: orderId,
-      amount: totalAmount.toFixed(2),
-      item_name: `Order ${orderId}`,
-    }
-
-    console.log('PayFast data prepared:', payFastData)
-
+    // Here you would implement your own payment processing logic
+    // For now, we'll just simulate a successful order submission
     try {
-      const signatureResponse = await fetch('/api/generate-payfast-signature', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payFastData),
-      })
-
-      if (!signatureResponse.ok) {
-        throw new Error('Failed to generate signature')
-      }
-
-      const { signature } = await signatureResponse.json()
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
       
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = process.env.NEXT_PUBLIC_PAYFAST_SANDBOX_URL || 'https://sandbox.payfast.co.za/eng/process'
-
-      Object.entries(payFastData).forEach(([key, value]) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = value.toString()
-        form.appendChild(input)
-      })
-
-      const signatureInput = document.createElement('input')
-      signatureInput.type = 'hidden'
-      signatureInput.name = 'signature'
-      signatureInput.value = signature
-      form.appendChild(signatureInput)
-
-      console.log('Form data before submission:', Object.fromEntries(new FormData(form)))
-
-      document.body.appendChild(form)
-      form.submit()
+      // If successful, redirect to a success page
+      router.push('/order-success')
     } catch (error) {
-      console.error('Error in PayFast submission:', error)
-      setError('Failed to process PayFast payment. Please try again.')
+      console.error('Error submitting order:', error)
+      setError('Failed to process payment. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1)
   }
 
   if (isLoading) {
@@ -292,9 +226,29 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="fullName" className="text-lg">Full Name</Label>
-                    <Input id="fullName" defaultValue={profile?.name || ''} className="mt-1 text-lg bg-white text-black" aria-label="Full name" required />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName" className="text-lg">First Name</Label>
+                      <Input
+                        id="firstName"
+                        defaultValue={profile?.firstName || ''}
+                        onChange={(e) => e.target.value = capitalizeFirstLetter(e.target.value)}
+                        className="mt-1 text-lg bg-white text-black"
+                        aria-label="First name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName" className="text-lg">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        defaultValue={profile?.lastName || ''}
+                        onChange={(e) => e.target.value = capitalizeFirstLetter(e.target.value)}
+                        className="mt-1 text-lg bg-white text-black"
+                        aria-label="Last name"
+                        required
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="address" className="text-lg">Address</Label>
@@ -331,7 +285,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <Label htmlFor="phone" className="text-lg">Phone Number</Label>
-                    <Input id="phone" defaultValue={profile?.phone || ''} className="mt-1 text-lg bg-white text-black" aria-label="Phone number" required  />
+                    <Input id="phone" defaultValue={profile?.phone || ''} className="mt-1 text-lg bg-white text-black" aria-label="Phone number" required />
                   </div>
                 </div>
               </CardContent>
@@ -373,9 +327,27 @@ export default function CheckoutPage() {
                 </div>
                 {differentBilling && (
                   <div className="mt-4 space-y-4">
-                    <div>
-                      <Label htmlFor="billingFullName" className="text-lg">Full Name</Label>
-                      <Input id="billingFullName" className="mt-1 text-lg bg-white text-black" aria-label="Billing full name" required />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="billingFirstName" className="text-lg">First Name</Label>
+                        <Input
+                          id="billingFirstName"
+                          className="mt-1 text-lg bg-white text-black"
+                          aria-label="Billing  first name"
+                          onChange={(e) => e.target.value = capitalizeFirstLetter(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="billingLastName" className="text-lg">Last Name</Label>
+                        <Input
+                          id="billingLastName"
+                          className="mt-1 text-lg bg-white text-black"
+                          aria-label="Billing last name"
+                          onChange={(e) => e.target.value = capitalizeFirstLetter(e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="billingAddress" className="text-lg">Address</Label>
@@ -388,7 +360,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <Label htmlFor="billingPostalCode" className="text-lg">Postal Code</Label>
-                        <Input id="billingPostalCode" className="mt-1 text-lg bg-white text-black" aria-label="Billing postal code" required />
+                        <Input id="billingPostalCode" className="mt-1 text-lg bg-white text-black" aria-label="Billing postal code" required  />
                       </div>
                     </div>
                     <div>
@@ -471,10 +443,9 @@ export default function CheckoutPage() {
                 </div>
                 <div className="mt-4 flex items-center justify-between bg-gray-100 p-4 rounded-lg">
                   <div className="flex items-center space-x-4">
-                    <Image src="/images/payfast-logo.png" alt="PayFast" width={100} height={30} />
-                    <span className="text-lg font-semibold">Secure payment via PayFast</span>
+                    <Lock className="text-green-600 h-6 w-6" />
+                    <span className="text-lg font-semibold">Secure payment</span>
                   </div>
-                  <Lock className="text-green-600 h-6 w-6" />
                 </div>
               </CardContent>
             </Card>
@@ -492,13 +463,13 @@ export default function CheckoutPage() {
               </Label>
             </div>
 
-            {/* Proceed to PayFast Button */}
+            {/* Submit Order Button */}
             <Button
-              onClick={handleProceedToPayFast}
+              onClick={handleSubmitOrder}
               disabled={!agreeToTerms || cart.length === 0 || isSubmitting}
               className="w-full bg-[#1c1c1c] text-white hover:bg-[#e87167] text-xl py-6"
             >
-              {isSubmitting ? 'Processing...' : `Pay R${totalAmount.toFixed(2)} with PayFast`}
+              {isSubmitting ? 'Processing...' : `Pay R${totalAmount.toFixed(2)}`}
             </Button>
           </div>
         </div>
