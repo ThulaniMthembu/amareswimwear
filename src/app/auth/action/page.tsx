@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { applyActionCode } from 'firebase/auth'
-import { auth } from '@/config/firebase'
+import { applyActionCode, getAuth } from 'firebase/auth'
 import { toast } from "@/components/ui/use-toast"
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,6 +22,7 @@ export default function AuthAction() {
 
       if (mode === 'verifyEmail' && actionCode) {
         try {
+          const auth = getAuth()
           await applyActionCode(auth, actionCode)
           await refreshUser()
           setVerificationStatus('success')
@@ -40,16 +40,24 @@ export default function AuthAction() {
           })
         }
       } else {
-        router.push('/')
+        setVerificationStatus('error')
+        toast({
+          title: "Invalid Action",
+          description: "The verification link is invalid or has expired.",
+          variant: "destructive",
+        })
       }
     }
 
     handleVerification()
-  }, [router, refreshUser])
+  }, [refreshUser])
 
   const handleContinue = () => {
-    const origin = window.location.origin
-    router.push(`${origin}/profile`)
+    if (verificationStatus === 'success') {
+      router.push('/profile')
+    } else {
+      router.push('/auth')
+    }
   }
 
   return (
@@ -78,8 +86,8 @@ export default function AuthAction() {
             {verificationStatus === 'error' && (
               <>
                 <p className="text-center mb-4 text-black">There was an error verifying your email. Please try again or contact support if the problem persists.</p>
-                <Button onClick={() => router.push('/verify-email')} className="w-full bg-black text-white hover:bg-gray-800">
-                  Back to Verification Page
+                <Button onClick={handleContinue} className="w-full bg-black text-white hover:bg-gray-800">
+                  Back to Login
                 </Button>
               </>
             )}

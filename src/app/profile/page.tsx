@@ -49,13 +49,12 @@ interface Address {
   postalCode: string
 }
 
-const ProfilePage: React.FC = () => {
+export default function ProfilePage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [successMessage] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -116,6 +115,11 @@ const ProfilePage: React.FC = () => {
     } catch (error) {
       console.error('Error fetching user profile:', error)
       setError('Failed to load user profile. Please try again later.')
+      toast({
+        title: "Error",
+        description: "Failed to load user profile. Please try again later.",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -375,7 +379,6 @@ const ProfilePage: React.FC = () => {
                       disabled={!isEditing}
                       aria-label="Last Name"
                     />
-                  
                   </div>
                   <div>
                     <Label htmlFor="email" className="text-[#1c1c1c]">Email</Label>
@@ -582,7 +585,6 @@ const ProfilePage: React.FC = () => {
           </CardContent>
           <CardFooter>
             {error && <p className="text-center text-red-500" role="alert">{error}</p>}
-            {successMessage && <p className="text-center text-green-500" role="alert">{successMessage}</p>}
           </CardFooter>
         </Card>
       </main>
@@ -590,5 +592,3 @@ const ProfilePage: React.FC = () => {
     </div>
   )
 }
-
-export default ProfilePage

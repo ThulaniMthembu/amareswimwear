@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import { useRouter } from 'next/navigation'
+import { toast } from "@/components/ui/use-toast"
 
 interface AuthContextType {
   user: User | null
@@ -43,6 +44,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         await refreshUser()
+        if (!user.emailVerified) {
+          await firebaseSignOut(auth)
+          setUser(null)
+          router.push('/auth')
+          toast({
+            title: "Email not verified",
+            description: "Please verify your email before logging in.",
+            variant: "destructive",
+          })
+        }
       } else {
         setUser(null)
       }
@@ -50,23 +61,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [router])
 
   const signUp = async (email: string, password: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await sendEmailVerification(userCredential.user)
+      toast({
+        title: "Sign up successful",
+        description: "Please check your email to verify your account.",
+      })
+      router.push('/verify-email')
     } catch (error) {
       console.error('Error signing up:', error)
+      toast({
+        title: "Sign up failed",
+        description: "An error occurred during sign up. Please try again.",
+        variant: "destructive",
+      })
       throw error
     }
   }
 
   const signIn = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      if (!userCredential.user.emailVerified) {
+        await firebaseSignOut(auth)
+        toast({
+          title: "Email not verified",
+          description: "Please verify your email before logging in.",
+          variant: "destructive",
+        })
+        router.push('/verify-email')
+      } else {
+        router.push('/profile')
+      }
     } catch (error) {
       console.error('Error signing in:', error)
+      toast({
+        title: "Sign in failed",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive",
+      })
       throw error
     }
   }
@@ -76,8 +113,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await firebaseSignOut(auth)
       setUser(null)
       router.push('/')
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      })
     } catch (error) {
       console.error('Error signing out:', error)
+      toast({
+        title: "Sign out failed",
+        description: "An error occurred during sign out. Please try again.",
+        variant: "destructive",
+      })
       throw error
     }
   }
@@ -86,8 +132,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (auth.currentUser) {
       try {
         await sendEmailVerification(auth.currentUser)
+        toast({
+          title: "Verification email sent",
+          description: "Please check your inbox and follow the link to verify your email.",
+        })
       } catch (error) {
         console.error('Error sending verification email:', error)
+        toast({
+          title: "Failed to send verification email",
+          description: "An error occurred. Please try again later.",
+          variant: "destructive",
+        })
         throw error
       }
     } else {
@@ -98,8 +153,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email)
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your inbox for instructions to reset your password.",
+      })
     } catch (error) {
       console.error('Error resetting password:', error)
+      toast({
+        title: "Failed to send password reset email",
+        description: "An error occurred. Please try again later.",
+        variant: "destructive",
+      })
       throw error
     }
   }

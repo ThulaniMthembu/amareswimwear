@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, AuthError } from 'firebase/auth'
-import { auth } from '@/config/firebase'
+import { doc, setDoc } from 'firebase/firestore'
+import { auth, db } from '@/config/firebase'
 import { useAuth } from '@/contexts/AuthContext'
-import { createUserProfile } from '@/utils/user'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,17 +16,16 @@ import { FcGoogle } from 'react-icons/fc'
 import Navbar from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter'
-import toast, { Toaster } from 'react-hot-toast'
+import { toast, Toaster } from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 
-const AuthPage: React.FC = () => {
+export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -75,7 +74,6 @@ const AuthPage: React.FC = () => {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSuccessMessage('')
     setIsLoading(true)
 
     if (!firstName.trim() || !lastName.trim()) {
@@ -109,12 +107,16 @@ const AuthPage: React.FC = () => {
         url: 'https://amareswimwear.vercel.app/auth?action=verifyEmail',
         handleCodeInApp: true,
       })
-      await createUserProfile({
-        ...userCredential.user,
-        displayName: `${firstName} ${lastName}`,
-        phoneNumber: phoneNumber
+      
+      // Create a user document in Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        createdAt: new Date().toISOString(),
       })
-      setSuccessMessage('Account created successfully. Please check your email for verification.')
+
       toast.success('Account created successfully. Please check your email for verification.')
       router.push('/verify-email')
     } catch (error) {
@@ -128,7 +130,6 @@ const AuthPage: React.FC = () => {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSuccessMessage('')
     setIsLoading(true)
 
     try {
@@ -149,12 +150,17 @@ const AuthPage: React.FC = () => {
   }
 
   const handleGoogleSignIn = async () => {
-    setSuccessMessage('')
     setIsLoading(true)
     const provider = new GoogleAuthProvider()
     try {
       const result = await signInWithPopup(auth, provider)
-      await createUserProfile(result.user)
+      await setDoc(doc(db, 'users', result.user.uid), {
+        firstName: result.user.displayName?.split(' ')[0] || '',
+        lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
+        email: result.user.email,
+        phoneNumber: result.user.phoneNumber || '',
+        createdAt: new Date().toISOString(),
+      }, { merge: true })
       const redirect = searchParams.get('redirect')
       if (redirect) {
         router.push(`/${redirect}`)
@@ -270,7 +276,7 @@ const AuthPage: React.FC = () => {
                       className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 absolute right-0 top-1/2 transform -translate-y-1/2 text-black"
                       onClick={togglePasswordVisibility}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ?   <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       <span className="sr-only">
                         {showPassword ? "Hide password" : "Show password"}
                       </span>
@@ -301,7 +307,6 @@ const AuthPage: React.FC = () => {
                       value={firstName}
                       onChange={(e) => setFirstName(capitalizeFirstLetter(e.target.value))}
                       required
-                      
                       className="input"
                     />
                   </div>
@@ -414,7 +419,6 @@ const AuthPage: React.FC = () => {
                 </form>
               </TabsContent>
             </Tabs>
-            {successMessage && <p className="text-green-500 text-sm mt-2" role="alert">{successMessage}</p>}
           </CardContent>
           <CardFooter className="flex-col space-y-4">
             <p className="p line">Or With</p>
@@ -435,5 +439,3 @@ const AuthPage: React.FC = () => {
     </div>
   )
 }
-
-export default AuthPage
