@@ -18,6 +18,7 @@ import { Footer } from '@/components/Footer'
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter'
 import { toast, Toaster } from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
+import { FirebaseError } from 'firebase/app'
 
 export default function AuthPage() {
   const [email, setEmail] = useState('')
@@ -102,27 +103,44 @@ export default function AuthPage() {
     }
 
     try {
+      console.log('Starting sign-up process')
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      console.log('User created successfully:', userCredential.user.uid)
+
+      console.log('Sending email verification')
       await sendEmailVerification(userCredential.user, {
         url: 'https://amareswimwear.vercel.app/auth?action=verifyEmail',
         handleCodeInApp: true,
       })
-      
-      // Create a user document in Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
-        createdAt: new Date().toISOString(),
-      })
+      console.log('Verification email sent')
 
-      toast.success('Account created successfully. Please check your email for verification.')
-      router.push('/verify-email')
+      console.log('Creating user document in Firestore')
+      try {
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          firstName,
+          lastName,
+          email,
+          phoneNumber,
+          createdAt: new Date().toISOString(),
+        })
+        console.log('User document created in Firestore')
+        toast.success('Account created successfully. Please check your email for verification.')
+        router.push('/verify-email')
+      } catch (firestoreError) {
+        console.error('Error creating user document:', firestoreError)
+        if (firestoreError instanceof FirebaseError) {
+          console.error('Firebase error code:', firestoreError.code)
+          console.error('Firebase error message:', firestoreError.message)
+        }
+        toast.error('Account created, but there was an issue saving your information. Please contact support.')
+      }
     } catch (error) {
-      const authError = error as AuthError
-      toast.error(authError.message || 'Failed to create an account. Please try again.')
-      console.error(error)
+      console.error('Detailed error:', error)
+      if (error instanceof FirebaseError) {
+        console.error('Firebase error code:', error.code)
+        console.error('Firebase error message:', error.message)
+      }
+      toast.error('Failed to create an account. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -276,7 +294,7 @@ export default function AuthPage() {
                       className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 absolute right-0 top-1/2 transform -translate-y-1/2 text-black"
                       onClick={togglePasswordVisibility}
                     >
-                      {showPassword ?   <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       <span className="sr-only">
                         {showPassword ? "Hide password" : "Show password"}
                       </span>
@@ -289,7 +307,9 @@ export default function AuthPage() {
                     </div>
                     <Link href="/reset-password" className="span">Forgot password?</Link>
                   </div>
-                  <Button type="submit" className="button-submit" disabled={isLoading}>
+                  
+                  <Button type="submit" className="button-submit" 
+                    disabled={isLoading}>
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </form>
