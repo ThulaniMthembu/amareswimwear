@@ -19,14 +19,16 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-try {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
-} catch (error) {
-  console.error("Error initializing Firebase:", error);
-  throw error;
+if (typeof window !== "undefined") {
+  try {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+  } catch (error) {
+    console.error("Error initializing Firebase:", error);
+    throw error;
+  }
 }
 
 export { app, auth, db, storage };

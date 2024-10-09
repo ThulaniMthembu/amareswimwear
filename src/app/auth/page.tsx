@@ -18,7 +18,6 @@ import { Footer } from '@/components/Footer'
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter'
 import { toast, Toaster } from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
-import { FirebaseError } from 'firebase/app'
 
 export default function AuthPage() {
   const [email, setEmail] = useState('')
@@ -69,7 +68,7 @@ export default function AuthPage() {
   }
 
   const validatePhoneNumber = (phone: string) => {
-    const phoneRegex = /^\+?[\d\s-]{10,}$/
+    const phoneRegex = /^\d{10}$/
     return phoneRegex.test(phone)
   }
 
@@ -84,7 +83,7 @@ export default function AuthPage() {
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      toast.error('Please enter a valid phone number.')
+      toast.error('Please enter a valid 10-digit phone number.')
       setIsLoading(false)
       return
     }
@@ -108,37 +107,34 @@ export default function AuthPage() {
       console.log('User created successfully:', userCredential.user.uid)
 
       console.log('Sending email verification')
-      await sendEmailVerification(userCredential.user, {
-        url: 'https://amareswimwear.vercel.app/auth?action=verifyEmail',
+      const actionCodeSettings = {
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-email?uid=${userCredential.user.uid}`,
         handleCodeInApp: true,
-      })
+      }
+      await sendEmailVerification(userCredential.user, actionCodeSettings)
       console.log('Verification email sent')
 
-      console.log('Creating user document in Firestore')
-      try {
-        await setDoc(doc(db, 'users', userCredential.user.uid), {
-          firstName,
-          lastName,
-          email,
-          phoneNumber,
-          createdAt: new Date().toISOString(),
-        })
-        console.log('User document created in Firestore')
-        toast.success('Account created successfully. Please check your email for verification.')
-        router.push('/verify-email')
-      } catch (firestoreError) {
-        console.error('Error creating user document:', firestoreError)
-        if (firestoreError instanceof FirebaseError) {
-          console.error('Firebase error code:', firestoreError.code)
-          console.error('Firebase error message:', firestoreError.message)
-        }
-        toast.error('Account created, but there was an issue saving your information. Please contact support.')
+      // Store user data in local storage
+      const userData = {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        createdAt: new Date().toISOString(),
+        emailVerified: false,
       }
+      localStorage.setItem('pendingUserData', JSON.stringify(userData))
+
+      toast.success('Account created successfully. Please check your email for verification.')
+      router.push('/auth/verify-email')
     } catch (error) {
-      console.error('Detailed error:', error)
-      if (error instanceof FirebaseError) {
-        console.error('Firebase error code:', error.code)
-        console.error('Firebase error message:', error.message)
+      console.error('Error creating account:', error)
+      if (error instanceof Error) {
+        console.error('Error name:', error.name)
+        console.error('Error message:', error.message)
+        if ('code' in error) {
+          console.error('Error code:', (error as { code: string }).code)
+        }
       }
       toast.error('Failed to create an account. Please try again.')
     } finally {
@@ -194,24 +190,9 @@ export default function AuthPage() {
     }
   }
 
-  const formatPhoneNumber = (value: string) => {
-    const cleaned = value.replace(/\D/g, '')
-    let formatted = cleaned
-    if (cleaned.length > 0) {
-      if (cleaned.length <= 3) {
-        formatted = cleaned
-      } else if (cleaned.length <= 6) {
-        formatted = `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
-      } else {
-        formatted = `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`
-      }
-    }
-    return formatted
-  }
-
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value)
-    setPhoneNumber(formatted)
+    const value = e.target.value.replace(/\D/g, '')
+    setPhoneNumber(value.slice(0, 10))
   }
 
   const togglePasswordVisibility = () => {
@@ -307,9 +288,7 @@ export default function AuthPage() {
                     </div>
                     <Link href="/reset-password" className="span">Forgot password?</Link>
                   </div>
-                  
-                  <Button type="submit" className="button-submit" 
-                    disabled={isLoading}>
+                  <Button type="submit" className="button-submit" disabled={isLoading}>
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </form>
@@ -319,7 +298,7 @@ export default function AuthPage() {
                   <div className="inputForm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
+                      <circle cx="12"   cy="7" r="4"></circle>
                     </svg>
                     <Input
                       type="text"
@@ -350,12 +329,13 @@ export default function AuthPage() {
                     </svg>
                     <Input
                       type="tel"
-                      placeholder="Enter your Phone Number"
+                      placeholder="Enter your Phone Number (10 digits)"
                       value={phoneNumber}
                       onChange={handlePhoneNumberChange}
                       required
                       className="input"
-                      pattern="[0-9\-]+"
+                      pattern="\d{10}"
+                      maxLength={10}
                     />
                   </div>
                   <div className="inputForm">
