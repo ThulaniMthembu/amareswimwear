@@ -70,6 +70,13 @@ export default function Navbar() {
     }
   }
 
+  const getUserName = () => {
+    if (user && user.displayName) {
+      return user.displayName
+    }
+    return 'Majxr Cole' // Default to 'Majxr Cole' if no display name is available
+  }
+
   return (
     <nav className="bg-[#fafaff] text-[#1c1c1c] p-4 sticky top-0 z-50 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
@@ -102,7 +109,7 @@ export default function Navbar() {
               transition={{ duration: 0.5 }}
             >
               <Link href="/profile" className="text-sm font-medium hover:text-[#e87167] mr-2">
-                {user.displayName ? `${user.displayName.split(' ')[0].charAt(0)}${user.displayName.split(' ')[1]?.charAt(0) || ''}` : 'U'}
+                {getUserName()}
               </Link>
               <Button 
                 variant="ghost" 
@@ -177,7 +184,7 @@ export default function Navbar() {
                     transition={{ duration: 0.5 }}
                   >
                     <Link href="/profile" className="text-lg hover:text-[#e87167]" onClick={toggleMenu}>
-                      {user.displayName ? `${user.displayName.split(' ')[0].charAt(0)}${user.displayName.split(' ')[1]?.charAt(0) || ''}` : 'U'}
+                      {getUserName()}
                     </Link>
                     <Button 
                       variant="ghost" 
