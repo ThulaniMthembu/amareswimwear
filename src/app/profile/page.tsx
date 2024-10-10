@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { doc, getDoc, setDoc, collection, getDocs, addDoc } from 'firebase/firestore'
-import { updateProfile, sendPasswordResetEmail } from 'firebase/auth'
+import { doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc } from 'firebase/firestore'
+import { sendPasswordResetEmail } from 'firebase/auth'
 import { db, storage, auth } from '@/config/firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Navbar from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
-import { Edit, Upload } from 'lucide-react'
+import { Edit, Upload, Trash2 } from 'lucide-react'
 import { toast } from "@/components/ui/use-toast"
 
 interface UserProfile {
@@ -66,6 +66,7 @@ export default function ProfilePage() {
     state: '',
     postalCode: ''
   })
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const fetchUserProfile = useCallback(async () => {
     if (!user) return
@@ -140,13 +141,23 @@ export default function ProfilePage() {
     }
   }, [user, loading, router, fetchUserProfile])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setProfile(prev => prev ? { ...prev, [name]: value } : null)
+    setProfile(prev => {
+      if (!prev) return null
+      const updatedProfile = { ...prev, [name]: value }
+      setHasUnsavedChanges(true)
+      return updatedProfile
+    })
   }
 
   const handleProvinceChange = (value: string) => {
-    setProfile(prev => prev ? { ...prev, province: value } : null)
+    setProfile(prev => {
+      if (!prev) return null
+      const updatedProfile = { ...prev, province: value }
+      setHasUnsavedChanges(true)
+      return updatedProfile
+    })
   }
 
   const capitalizeFirstLetter = (string: string) => {
@@ -159,15 +170,13 @@ export default function ProfilePage() {
 
     setIsLoading(true)
     try {
-      await setDoc(doc(db, 'users', user.uid), profile)
-      await updateProfile(user, {
-        displayName: `${profile.firstName} ${profile.lastName}`,
-        photoURL: profile.photoURL,
-      })
+      const userDocRef = doc(db, 'users', user.uid)
+      await setDoc(userDocRef, profile, { merge: true })
       toast({
         title: "Success",
         description: "Profile updated successfully!",
       })
+      setHasUnsavedChanges(false)
       setIsEditing(false)
     } catch (error) {
       console.error('Error updating profile:', error)
@@ -199,7 +208,11 @@ export default function ProfilePage() {
       const snapshot = await uploadBytes(storageRef, file)
       const downloadURL = await getDownloadURL(snapshot.ref)
       setProfile(prev => prev ? { ...prev, photoURL: downloadURL } : null)
-      await updateProfile(user, { photoURL: downloadURL })
+      
+      // Update the user document in Firestore
+      const userDocRef = doc(db, 'users', user.uid)
+      await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true })
+      
       toast({
         title: "Success",
         description: "Profile picture updated successfully!",
@@ -250,6 +263,25 @@ export default function ProfilePage() {
       toast({
         title: "Error",
         description: "Failed to add address. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!user) return
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'addresses', addressId))
+      setAddresses(addresses.filter(address => address.id !== addressId))
+      toast({
+        title: "Success",
+        description: "Address deleted successfully!",
+      })
+    } catch (error) {
+      console.error('Error deleting address:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete address. Please try again.",
         variant: "destructive",
       })
     }
@@ -321,20 +353,20 @@ export default function ProfilePage() {
               <Button
                 onClick={handleUploadClick}
                 variant="outline"
-                size="icon"
+                size="sm"
                 disabled={isLoading}
               >
-                <Upload className="h-4 w-4" />
-                <span className="sr-only">Upload profile picture</span>
+                <Upload className="h-4 w-4 mr-2" />
+                Update Avatar
               </Button>
               <Button
                 onClick={handleEditClick}
                 variant="outline"
-                size="icon"
-                disabled={isLoading}
+                size="sm"
+                disabled={isEditing}
               >
-                <Edit className="h-4 w-4" />
-                <span className="sr-only">Edit profile</span>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Profile
               </Button>
             </div>
           </CardHeader>
@@ -355,7 +387,8 @@ export default function ProfilePage() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="addresses"
-                  className="data-[state=active]:bg-[#1c1c1c] data-[state=active]:text-white data-[state=inactive]:bg-[#e0e0e0] data-[state=inactive]:text-[#1c1c1c] data-[state=inactive]:hover:bg-[#e87167] data-[state=inactive]:hover:text-white"
+                  className="data-[state=active]:bg-[#1c1c1c] data-[state=active]:text-white data-[state=inactive]:bg-[#e0e0e0] data-[state=inactive]:text-[#1c1c1c] data-[state=inactive]:hover:bg-[#e87167] 
+                  data-[state=inactive]:hover:text-white"
                 >
                   Addresses
                 </TabsTrigger>
@@ -375,10 +408,10 @@ export default function ProfilePage() {
                       name="firstName"
                       value={profile.firstName}
                       onChange={(e) => {
-                        e.target.value  = capitalizeFirstLetter(e.target.value)
+                        e.target.value = capitalizeFirstLetter(e.target.value)
                         handleInputChange(e)
                       }}
-                      className="bg-white  border-[#1c1c1c] text-[#1c1c1c]"
+                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
                       disabled={!isEditing}
                       aria-label="First Name"
                     />
@@ -482,7 +515,11 @@ export default function ProfilePage() {
                     />
                   </div>
                   {isEditing && (
-                    <Button type="submit" className="w-full bg-[#1c1c1c] text-white hover:bg-[#e87167]">
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-[#1c1c1c] text-white hover:bg-[#e87167]"
+                      disabled={!hasUnsavedChanges}
+                    >
                       Save Changes
                     </Button>
                   )}
@@ -494,18 +531,18 @@ export default function ProfilePage() {
                     orders.map((order) => (
                       <Card key={order.id}>
                         <CardHeader>
-                          <CardTitle>Order #{order.id}</CardTitle>
-                          <CardDescription>Date: {order.date}</CardDescription>
+                          <CardTitle className="text-[#1c1c1c]">Order #{order.id}</CardTitle>
+                          <CardDescription className="text-[#4a4a4a]">Date: {order.date}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <p>Items: {order.items.join(', ')}</p>
-                          <p>Total: ${order.total.toFixed(2)}</p>
-                          <p>Status: {order.status}</p>
+                          <p className="text-[#1c1c1c]">Items: {order.items.join(', ')}</p>
+                          <p className="text-[#1c1c1c]">Total: ${order.total.toFixed(2)}</p>
+                          <p className="text-[#1c1c1c]">Status: {order.status}</p>
                         </CardContent>
                       </Card>
                     ))
                   ) : (
-                    <p>No orders found.</p>
+                    <p className="text-[#1c1c1c]">No orders found.</p>
                   )}
                 </div>
               </TabsContent>
@@ -513,28 +550,35 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   {addresses.map((address) => (
                     <Card key={address.id}>
-                      <CardHeader>
-                        <CardTitle>{address.type === 'shipping' ? 'Shipping' : 'Billing'} Address</CardTitle>
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="text-[#1c1c1c]">{address.type === 'shipping' ? 'Shipping' : 'Billing'} Address</CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteAddress(address.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </CardHeader>
                       <CardContent>
-                        <p>{address.street}</p>
-                        <p>{address.city}, {address.state} {address.postalCode}</p>
+                        <p className="text-[#1c1c1c]">{address.street}</p>
+                        <p className="text-[#1c1c1c]">{address.city}, {address.state} {address.postalCode}</p>
                       </CardContent>
                     </Card>
                   ))}
                   {isAddingAddress ? (
                     <Card>
                       <CardHeader>
-                        <CardTitle>Add New Address</CardTitle>
+                        <CardTitle className="text-[#1c1c1c]">Add New Address</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <form onSubmit={(e) => { e.preventDefault(); handleAddAddress(); }} className="space-y-4">
                           <div>
-                            <Label htmlFor="addressType">Address Type</Label>
+                            <Label htmlFor="addressType" className="text-[#1c1c1c]">Address Type</Label>
                             <Select
                               onValueChange={(value) => setNewAddress({ ...newAddress, type: value as 'shipping' | 'billing' })}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="bg-white border-[#1c1c1c] text-[#1c1c1c]">
                                 <SelectValue placeholder="Select address type" />
                               </SelectTrigger>
                               <SelectContent>
@@ -544,67 +588,68 @@ export default function ProfilePage() {
                             </Select>
                           </div>
                           <div>
-                            <Label htmlFor="street">Street</Label>
+                            <Label htmlFor="street" className="text-[#1c1c1c]">Street</Label>
                             <Input
                               id="street"
                               value={newAddress.street}
                               onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+                              className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
                               required
                             />
                           </div>
                           <div>
-                            <Label htmlFor="city">City</Label>
+                            <Label htmlFor="city" className="text-[#1c1c1c]">City</Label>
                             <Input
                               id="city"
                               value={newAddress.city}
                               onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                              className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
                               required
                             />
                           </div>
                           <div>
-                            <Label htmlFor="state">State</Label>
+                            <Label htmlFor="state" className="text-[#1c1c1c]">State</Label>
                             <Input
                               id="state"
                               value={newAddress.state}
                               onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                              className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
                               required
                             />
                           </div>
                           <div>
-                            <Label htmlFor="postalCode">Postal Code</Label>
+                            <Label htmlFor="postalCode" className="text-[#1c1c1c]">Postal Code</Label>
                             <Input
                               id="postalCode"
                               value={newAddress.postalCode}
                               onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
+                              className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
                               required
                             />
                           </div>
-                          <Button type="submit">Add Address</Button>
+                          <Button type="submit" className="bg-[#1c1c1c] text-white hover:bg-[#e87167]">Add Address</Button>
                         </form>
                       </CardContent>
                     </Card>
                   ) : (
-                    <Button onClick={() => setIsAddingAddress(true)}>Add New Address</Button>
+                    <Button onClick={() => setIsAddingAddress(true)} className="bg-[#1c1c1c] text-white hover:bg-[#e87167]">Add New Address</Button>
                   )}
                 </div>
               </TabsContent>
               <TabsContent value="security">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Password</h3>
-                  <p>For your security, we don&apos;t display your password. You can reset it if needed.</p>
-                  <Button onClick={handlePasswordReset}>Reset Password</Button>
+                  <h3 className="text-lg font-semibold text-[#1c1c1c]">Password</h3>
+                  <p className="text-[#1c1c1c]">For your security, we don&apos;t display your password. You can reset it if needed.</p>
+                  <Button onClick={handlePasswordReset} className="bg-[#1c1c1c] text-white hover:bg-[#e87167]">Reset Password</Button>
                   <Separator />
-                  <h3 className="text-lg font-semibold">Two-Factor Authentication</h3>
-                  <p>Enhance your account security by enabling two-factor authentication.</p>
-                  <Button>Enable 2FA</Button>
+                  <h3 className="text-lg font-semibold text-[#1c1c1c]">Two-Factor Authentication</h3>
+                  <p className="text-[#1c1c1c]">Enhance your account security by enabling two-factor authentication.</p>
+                  <Button className="bg-[#1c1c1c] text-white hover:bg-[#e87167]">Enable 2FA</Button>
                 </div>
               </TabsContent>
             </Tabs>
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button onClick={() => setIsEditing(!isEditing)} variant="outline">
-              {isEditing ? 'Cancel' : 'Edit Profile'}
-            </Button>
+          <CardFooter className="flex justify-end">
             <Button onClick={handleSignOut} variant="destructive">
               Sign Out
             </Button>
