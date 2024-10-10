@@ -50,11 +50,10 @@ interface Address {
 }
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const router = useRouter()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -72,7 +71,9 @@ export default function ProfilePage() {
     if (!user) return
     setIsLoading(true)
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid))
+      const userDocRef = doc(db, 'users', user.uid)
+      const userDoc = await getDoc(userDocRef)
+      
       if (userDoc.exists()) {
         const userData = userDoc.data() as UserProfile
         setProfile({
@@ -88,8 +89,9 @@ export default function ProfilePage() {
           photoURL: userData.photoURL || user.photoURL || '',
         })
       } else {
+        // Create a new user document if it doesn't exist
         const [firstName, lastName] = (user.displayName || '').split(' ')
-        setProfile({
+        const newUserData = {
           firstName: firstName || '',
           lastName: lastName || '',
           email: user.email || '',
@@ -99,7 +101,10 @@ export default function ProfilePage() {
           province: '',
           postalCode: '',
           photoURL: user.photoURL || '',
-        })
+          createdAt: new Date().toISOString(),
+        }
+        await setDoc(userDocRef, newUserData)
+        setProfile(newUserData)
       }
       
       // Fetch orders
@@ -114,7 +119,6 @@ export default function ProfilePage() {
 
     } catch (error) {
       console.error('Error fetching user profile:', error)
-      setError('Failed to load user profile. Please try again later.')
       toast({
         title: "Error",
         description: "Failed to load user profile. Please try again later.",
@@ -192,8 +196,8 @@ export default function ProfilePage() {
     setIsLoading(true)
     try {
       const storageRef = ref(storage, `profile_pictures/${user.uid}`)
-      await uploadBytes(storageRef, file)
-      const downloadURL = await getDownloadURL(storageRef)
+      const snapshot = await uploadBytes(storageRef, file)
+      const downloadURL = await getDownloadURL(snapshot.ref)
       setProfile(prev => prev ? { ...prev, photoURL: downloadURL } : null)
       await updateProfile(user, { photoURL: downloadURL })
       toast({
@@ -246,6 +250,20 @@ export default function ProfilePage() {
       toast({
         title: "Error",
         description: "Failed to add address. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      router.push('/')
+    } catch (error) {
+      console.error('Error signing out:', error)
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
         variant: "destructive",
       })
     }
@@ -357,10 +375,10 @@ export default function ProfilePage() {
                       name="firstName"
                       value={profile.firstName}
                       onChange={(e) => {
-                        e.target.value = capitalizeFirstLetter(e.target.value)
+                        e.target.value  = capitalizeFirstLetter(e.target.value)
                         handleInputChange(e)
                       }}
-                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
+                      className="bg-white  border-[#1c1c1c] text-[#1c1c1c]"
                       disabled={!isEditing}
                       aria-label="First Name"
                     />
@@ -583,8 +601,13 @@ export default function ProfilePage() {
               </TabsContent>
             </Tabs>
           </CardContent>
-          <CardFooter>
-            {error && <p className="text-center text-red-500" role="alert">{error}</p>}
+          <CardFooter className="flex justify-between">
+            <Button onClick={() => setIsEditing(!isEditing)} variant="outline">
+              {isEditing ? 'Cancel' : 'Edit Profile'}
+            </Button>
+            <Button onClick={handleSignOut} variant="destructive">
+              Sign Out
+            </Button>
           </CardFooter>
         </Card>
       </main>
