@@ -9,7 +9,8 @@ import {
   signInWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
-  reload
+  reload,
+  updateProfile
 } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import { useRouter } from 'next/navigation'
@@ -18,7 +19,7 @@ import { toast } from "@/components/ui/use-toast"
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signUp: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   sendVerificationEmail: () => Promise<void>
@@ -63,9 +64,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe()
   }, [router])
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const displayName = `${firstName} ${lastName}`
+      await updateProfile(userCredential.user, { displayName })
       await sendEmailVerification(userCredential.user)
       toast({
         title: "Sign up successful",
@@ -95,6 +98,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         })
         router.push('/verify-email')
       } else {
+        if (!userCredential.user.displayName) {
+          // If display name is not set, update it with the user's email (or another default value)
+          await updateProfile(userCredential.user, { displayName: email.split('@')[0] })
+          await refreshUser()
+        }
         router.push('/profile')
       }
     } catch (error) {
@@ -183,6 +191,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
+  )
+}
+
+export default function Component({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      {children}
+    </AuthProvider>
   )
 }
 

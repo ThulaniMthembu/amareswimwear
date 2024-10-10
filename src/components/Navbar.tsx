@@ -7,8 +7,6 @@ import CartModal from './CartModal'
 import { Button } from "@/components/ui/button"
 import { ShoppingBag, User, Menu, LogOut, X } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { auth } from '@/config/firebase'
-import { signOut } from 'firebase/auth'
 import { motion, AnimatePresence } from 'framer-motion'
 import { lockScroll, unlockScroll } from '@/utils/scrollLock'
 
@@ -22,10 +20,9 @@ export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const { cart } = useCart()
   const [cartItemCount, setCartItemCount] = useState(0)
-  const { user } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const menuRef = useRef<HTMLDivElement>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const [userName, setUserName] = useState('User')
 
   useEffect(() => {
     setCartItemCount(cart.reduce((total, item) => total + item.quantity, 0))
@@ -51,22 +48,6 @@ export default function Navbar() {
     }
   }, [isMenuOpen])
 
-  useEffect(() => {
-    const updateUserName = () => {
-      const userNameElement = document.querySelector('[data-user-name]')
-      if (userNameElement) {
-        setUserName(userNameElement.textContent || 'User')
-      }
-    }
-
-    updateUserName()
-    // Set up a MutationObserver to watch for changes in the DOM
-    const observer = new MutationObserver(updateUserName)
-    observer.observe(document.body, { subtree: true, childList: true })
-
-    return () => observer.disconnect()
-  }, [])
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
@@ -78,13 +59,26 @@ export default function Navbar() {
   const handleSignOut = async () => {
     setIsSigningOut(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Delay for animation
-      await signOut(auth)
+      await signOut()
     } catch (error) {
       console.error('Failed to sign out', error)
     } finally {
       setIsSigningOut(false)
     }
+  }
+
+  const getUserDisplayName = () => {
+    if (user && user.displayName) {
+      const names = user.displayName.split(' ')
+      const firstName = names[0]
+      const lastName = names.length > 1 ? names[names.length - 1] : ''
+      return `${firstName.charAt(0)} ${lastName}`
+    } else if (user && user.email) {
+      // If displayName is not set, use the email
+      const [localPart] = user.email.split('@')
+      return localPart.charAt(0).toUpperCase() + localPart.slice(1)
+    }
+    return 'User'
   }
 
   return (
@@ -111,33 +105,37 @@ export default function Navbar() {
           ))}
         </div>
         <div className="flex items-center">
-          {user ? (
-            <motion.div 
-              className="flex items-center ml-4"
-              initial={{ opacity: 1 }}
-              animate={{ opacity: isSigningOut ? 0 : 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Link href="/profile" className="text-sm font-medium hover:text-[#e87167] mr-2">
-                {userName}
-              </Link>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-              >
-                <LogOut className={`h-5 w-5 ${isSigningOut ? 'animate-spin' : ''}`} />
-                <span className="sr-only">Sign out</span>
-              </Button>
-            </motion.div>
-          ) : (
-            <Link href="/auth" className="ml-4">
-              <Button variant="ghost" size="icon">
-                <User className="h-6 w-6" />
-                <span className="sr-only">User account</span>
-              </Button>
-            </Link>
+          {!loading && (
+            <>
+              {user ? (
+                <motion.div 
+                  className="flex items-center ml-4"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: isSigningOut ? 0 : 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Link href="/profile" className="text-sm font-medium hover:text-[#e87167] mr-2">
+                    {getUserDisplayName()}
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                  >
+                    <LogOut className={`h-5 w-5 ${isSigningOut ? 'animate-spin' : ''}`} />
+                    <span className="sr-only">Sign out</span>
+                  </Button>
+                </motion.div>
+              ) : (
+                <Link href="/auth" className="ml-4">
+                  <Button variant="ghost" size="icon">
+                    <User className="h-6 w-6" />
+                    <span className="sr-only">User account</span>
+                  </Button>
+                </Link>
+              )}
+            </>
           )}
           <Button variant="ghost" size="icon" onClick={toggleCart} className="relative ml-4">
             <ShoppingBag className="h-6 w-6" />
@@ -186,33 +184,37 @@ export default function Navbar() {
                     {item.name}
                   </Link>
                 ))}
-                {user ? (
-                  <motion.div 
-                    className="flex items-center justify-between"
-                    initial={{ opacity: 1 }}
-                    animate={{ opacity: isSigningOut ? 0 : 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Link href="/profile" className="text-lg hover:text-[#e87167]" onClick={toggleMenu}>
-                      {userName}
-                    </Link>
-                    <Button 
-                      variant="ghost" 
-                      onClick={handleSignOut} 
-                      className="p-0 hover:text-[#e87167]"
-                      disabled={isSigningOut}
-                    >
-                      <LogOut className={`h-6 w-6 ${isSigningOut ? 'animate-spin' : ''}`} />
-                      <span className="sr-only">Sign out</span>
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <Link href="/auth" onClick={toggleMenu}>
-                    <Button variant="ghost" className="justify-start p-0 hover:text-[#e87167]">
-                      <User className="h-6 w-6 mr-2" />
-                      Sign in
-                    </Button>
-                  </Link>
+                {!loading && (
+                  <>
+                    {user ? (
+                      <motion.div 
+                        className="flex items-center justify-between"
+                        initial={{ opacity: 1 }}
+                        animate={{ opacity: isSigningOut ? 0 : 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <Link href="/profile" className="text-lg hover:text-[#e87167]" onClick={toggleMenu}>
+                          {getUserDisplayName()}
+                        </Link>
+                        <Button 
+                          variant="ghost" 
+                          onClick={handleSignOut} 
+                          className="p-0 hover:text-[#e87167]"
+                          disabled={isSigningOut}
+                        >
+                          <LogOut className={`h-6 w-6 ${isSigningOut ? 'animate-spin' : ''}`} />
+                          <span className="sr-only">Sign out</span>
+                        </Button>
+                      </motion.div>
+                    ) : (
+                      <Link href="/auth" onClick={toggleMenu}>
+                        <Button variant="ghost" className="justify-start p-0 hover:text-[#e87167]">
+                          <User className="h-6 w-6 mr-2" />
+                          Sign in
+                        </Button>
+                      </Link>
+                    )}
+                  </>
                 )}
               </div>
             </div>
