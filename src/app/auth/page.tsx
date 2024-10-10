@@ -45,6 +45,19 @@ export default function AuthPage() {
     }
   }, [user, loading, router, searchParams])
 
+  const showToast = (message: string, isError: boolean) => {
+    toast(message, {
+      style: {
+        background: '#FFFFFF',
+        color: '#000000',
+        padding: '16px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      },
+      icon: isError ? '❌' : '✅',
+    })
+  }
+
   const validatePassword = (password: string) => {
     const minLength = 8
     const maxLength = 16
@@ -77,26 +90,26 @@ export default function AuthPage() {
     setIsLoading(true)
 
     if (!firstName.trim() || !lastName.trim()) {
-      toast.error('Please enter your first and last name.')
+      showToast('Please enter your first and last name.', true)
       setIsLoading(false)
       return
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      toast.error('Please enter a valid 10-digit phone number.')
+      showToast('Please enter a valid 10-digit phone number.', true)
       setIsLoading(false)
       return
     }
 
     const passwordError = validatePassword(password)
     if (passwordError) {
-      toast.error(passwordError)
+      showToast(passwordError, true)
       setIsLoading(false)
       return
     }
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match.')
+      showToast('Passwords do not match.', true)
       setIsLoading(false)
       return
     }
@@ -114,7 +127,6 @@ export default function AuthPage() {
       await sendEmailVerification(userCredential.user, actionCodeSettings)
       console.log('Verification email sent')
 
-      // Store user data in local storage
       const userData = {
         firstName,
         lastName,
@@ -125,7 +137,7 @@ export default function AuthPage() {
       }
       localStorage.setItem('pendingUserData', JSON.stringify(userData))
 
-      toast.success('Account created successfully. Please check your email for verification.')
+      showToast('Account created successfully. Please check your email for verification.', false)
       router.push('/auth/verify-email')
     } catch (error) {
       console.error('Error creating account:', error)
@@ -136,7 +148,7 @@ export default function AuthPage() {
           console.error('Error code:', (error as { code: string }).code)
         }
       }
-      toast.error('Failed to create an account. Please try again.')
+      showToast('Failed to create an account. Please try again.', true)
     } finally {
       setIsLoading(false)
     }
@@ -156,7 +168,7 @@ export default function AuthPage() {
       }
     } catch (error) {
       const authError = error as AuthError
-      toast.error(authError.message || 'Failed to sign in. Please check your credentials.')
+      showToast(authError.message || 'Failed to sign in. Please check your credentials.', true)
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -183,7 +195,7 @@ export default function AuthPage() {
       }
     } catch (error) {
       const authError = error as AuthError
-      toast.error(authError.message || 'Failed to sign in with Google. Please try again.')
+      showToast(authError.message || 'Failed to sign in with Google. Please try again.', true)
       console.error(error)
     } finally {
       setIsLoading(false)
@@ -296,7 +308,7 @@ export default function AuthPage() {
               <TabsContent value="signup">
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
                   <div className="inputForm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round"    strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0  0-4 4v2"></path>
                       <circle cx="12" cy="7" r="4"></circle>
                     </svg>
@@ -435,7 +447,10 @@ export default function AuthPage() {
         </Card>
       </main>
       <Footer />
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster 
+        position="top-center" 
+        reverseOrder={false}
+      />
     </div>
   )
 }
