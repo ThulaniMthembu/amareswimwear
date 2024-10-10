@@ -127,7 +127,7 @@ const ContactPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <User className="text-[#1c1c1c]" />
-                  <p className="text-[#1c1c1c]">Zoe Kavinsky</p>
+                  <p className="text-[#1c1c1c]">Zanele Kibido</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Phone className="text-[#1c1c1c]" />

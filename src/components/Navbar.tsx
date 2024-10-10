@@ -25,6 +25,7 @@ export default function Navbar() {
   const { user } = useAuth()
   const menuRef = useRef<HTMLDivElement>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
+  const [userName, setUserName] = useState('User')
 
   useEffect(() => {
     setCartItemCount(cart.reduce((total, item) => total + item.quantity, 0))
@@ -50,6 +51,22 @@ export default function Navbar() {
     }
   }, [isMenuOpen])
 
+  useEffect(() => {
+    const updateUserName = () => {
+      const userNameElement = document.querySelector('[data-user-name]')
+      if (userNameElement) {
+        setUserName(userNameElement.textContent || 'User')
+      }
+    }
+
+    updateUserName()
+    // Set up a MutationObserver to watch for changes in the DOM
+    const observer = new MutationObserver(updateUserName)
+    observer.observe(document.body, { subtree: true, childList: true })
+
+    return () => observer.disconnect()
+  }, [])
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
@@ -68,13 +85,6 @@ export default function Navbar() {
     } finally {
       setIsSigningOut(false)
     }
-  }
-
-  const getUserName = () => {
-    if (user && user.displayName) {
-      return user.displayName
-    }
-    return 'Majxr Cole' // Default to 'Majxr Cole' if no display name is available
   }
 
   return (
@@ -109,7 +119,7 @@ export default function Navbar() {
               transition={{ duration: 0.5 }}
             >
               <Link href="/profile" className="text-sm font-medium hover:text-[#e87167] mr-2">
-                {getUserName()}
+                {userName}
               </Link>
               <Button 
                 variant="ghost" 
@@ -184,7 +194,7 @@ export default function Navbar() {
                     transition={{ duration: 0.5 }}
                   >
                     <Link href="/profile" className="text-lg hover:text-[#e87167]" onClick={toggleMenu}>
-                      {getUserName()}
+                      {userName}
                     </Link>
                     <Button 
                       variant="ghost" 

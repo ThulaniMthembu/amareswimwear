@@ -470,21 +470,23 @@ const HomePage: React.FC = () => {
                   transition={{ duration: 0.5, delay: 0.1 }}
                   className='text-[#1c1c1c] mb-4'
                 >
-                  Amare Swim Resort was born from a passion to empower women of
-                  all shapes and sizes. Our journey began with a simple idea:
-                  every woman deserves to feel confident, beautiful, and
-                  comfortable in her swimwear.
+                  Introducing Amare, a bikini brand founded by Zanele Kibido that embodies the essence of love and self-acceptance. Amare is more than just a swimwear label - it&apos;s a celebration of body positivity, confidence, and sass. Our mission is to help women reconnect with their inner beauty and fall deeply in love with themselves.
                 </motion.p>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
+                  className='text-[#1c1c1c] mb-4'
+                >
+                  With a curated collection of flattering, curve-hugging bikinis, Amare caters to every shape and size. Standout designs feature vibrant colors, bold prints, and daring silhouettes that command attention.
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
                   className='text-[#1c1c1c]'
                 >
-                  We design our swimwear with love, care, and attention to
-                  detail, ensuring that each piece not only looks stunning but
-                  also provides the perfect fit. Join us in celebrating
-                  diversity, body positivity, and self-love.
+                  Whether poolside or beach-bound, Amare invites women to embrace their uniqueness and radiate empowerment. Indulge in a little self-love this summer with a stunning Amare bikini.
                 </motion.p>
               </div>
               <div>
@@ -506,17 +508,17 @@ const HomePage: React.FC = () => {
               <h3 className='text-2xl font-bold mb-4 text-[#1c1c1c]'>
                 A Word from Our CEO
               </h3>
+              <p className='text-[#1c1c1c] italic mb-4'>
+                &quot;Amare embodies confidence, sass, and sexiness, empowering women of all shapes and sizes to embrace their bodies and celebrate their individuality.&quot;
+              </p>
+              <p className='text-[#1c1c1c] italic mb-4'>
+                &quot;This brand is personal for me, as it reminds me of my childhood and pageantry days as a teenager - a time when I learned to love and embrace myself. With Amare, I want to inspire you to do the same - to rediscover and embrace your self-love.&quot;
+              </p>
               <p className='text-[#1c1c1c] italic'>
-                &quot;At Amare, we believe that every woman deserves to feel
-                beautiful and confident in her own skin. Our mission is to
-                create swimwear that not only looks stunning but also empowers
-                women to embrace their unique beauty. We&apos;re committed to
-                celebrating diversity and promoting body positivity through our
-                designs and our community. Join us in this journey of self-love
-                and confidence.&quot;
+                &quot;Join me on this journey, and let&apos;s celebrate our unique beauty and strength together!&quot;
               </p>
               <p className='mt-4 text-[#1c1c1c] font-semibold'>
-                - Zoe Kavinsky, CEO of Amare Swim Resort
+                - Zanele Kibido, CEO of Amare Swim Resort
               </p>
             </motion.div>
           </div>
