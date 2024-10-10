@@ -17,7 +17,7 @@ const featuredItems = [
   { name: 'Best Sellers', href: '/shop' },
 ]
 
-const Navbar: React.FC = () => {
+export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const { cart } = useCart()
@@ -102,7 +102,7 @@ const Navbar: React.FC = () => {
               transition={{ duration: 0.5 }}
             >
               <Link href="/profile" className="text-sm font-medium hover:text-[#e87167] mr-2">
-                {user.displayName || 'User'}
+                {user.displayName ? `${user.displayName.split(' ')[0].charAt(0)}${user.displayName.split(' ')[1]?.charAt(0) || ''}` : 'U'}
               </Link>
               <Button 
                 variant="ghost" 
@@ -177,7 +177,7 @@ const Navbar: React.FC = () => {
                     transition={{ duration: 0.5 }}
                   >
                     <Link href="/profile" className="text-lg hover:text-[#e87167]" onClick={toggleMenu}>
-                      {user.displayName || 'User'}
+                      {user.displayName ? `${user.displayName.split(' ')[0].charAt(0)}${user.displayName.split(' ')[1]?.charAt(0) || ''}` : 'U'}
                     </Link>
                     <Button 
                       variant="ghost" 
@@ -206,5 +206,3 @@ const Navbar: React.FC = () => {
     </nav>
   )
 }
-
-export default Navbar

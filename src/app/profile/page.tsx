@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Navbar from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
-import { Edit, Upload, Trash2 } from 'lucide-react'
+import { Edit, Upload, Trash2, X } from 'lucide-react'
 import { toast } from "@/components/ui/use-toast"
 
 interface UserProfile {
@@ -67,6 +67,7 @@ export default function ProfilePage() {
     postalCode: ''
   })
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null)
 
   const fetchUserProfile = useCallback(async () => {
     if (!user) return
@@ -77,7 +78,7 @@ export default function ProfilePage() {
       
       if (userDoc.exists()) {
         const userData = userDoc.data() as UserProfile
-        setProfile({
+        const profileData = {
           ...userData,
           firstName: userData.firstName || '',
           lastName: userData.lastName || '',
@@ -88,7 +89,9 @@ export default function ProfilePage() {
           province: userData.province || '',
           postalCode: userData.postalCode || '',
           photoURL: userData.photoURL || user.photoURL || '',
-        })
+        }
+        setProfile(profileData)
+        setOriginalProfile(profileData)
       } else {
         // Create a new user document if it doesn't exist
         const [firstName, lastName] = (user.displayName || '').split(' ')
@@ -106,6 +109,7 @@ export default function ProfilePage() {
         }
         await setDoc(userDocRef, newUserData)
         setProfile(newUserData)
+        setOriginalProfile(newUserData)
       }
       
       // Fetch orders
@@ -178,6 +182,7 @@ export default function ProfilePage() {
       })
       setHasUnsavedChanges(false)
       setIsEditing(false)
+      setOriginalProfile(profile)
     } catch (error) {
       console.error('Error updating profile:', error)
       toast({
@@ -192,6 +197,12 @@ export default function ProfilePage() {
 
   const handleEditClick = () => {
     setIsEditing(true)
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setProfile(originalProfile)
+    setHasUnsavedChanges(false)
   }
 
   const handleUploadClick = () => {
@@ -334,7 +345,9 @@ export default function ProfilePage() {
             <div className="flex items-center mb-4 sm:mb-0">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={profile.photoURL} alt={`${profile.firstName} ${profile.lastName}`} />
-                <AvatarFallback>{profile.firstName ? profile.firstName.charAt(0) : 'U'}</AvatarFallback>
+                <AvatarFallback className="bg-[#1c1c1c] text-white text-2xl font-bold">
+                  {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <div className="ml-4">
                 <CardTitle className="text-2xl font-bold text-[#1c1c1c]">{`${profile.firstName} ${profile.lastName}`}</CardTitle>
@@ -381,14 +394,14 @@ export default function ProfilePage() {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="orders"
-                  className="data-[state=active]:bg-[#1c1c1c] data-[state=active]:text-white data-[state=inactive]:bg-[#e0e0e0] data-[state=inactive]:text-[#1c1c1c] data-[state=inactive]:hover:bg-[#e87167] data-[state=inactive]:hover:text-white"
+                  className="data-[state=active]:bg-[#1c1c1c] data-[state=active]:text-white data-[state=inactive]:bg-[#e0e0e0] data-[state=inactive]:text-[#1c1c1c] 
+                  data-[state=inactive]:hover:bg-[#e87167] data-[state=inactive]:hover:text-white"
                 >
                   Orders
                 </TabsTrigger>
                 <TabsTrigger 
                   value="addresses"
-                  className="data-[state=active]:bg-[#1c1c1c] data-[state=active]:text-white data-[state=inactive]:bg-[#e0e0e0] data-[state=inactive]:text-[#1c1c1c] data-[state=inactive]:hover:bg-[#e87167] 
-                  data-[state=inactive]:hover:text-white"
+                  className="data-[state=active]:bg-[#1c1c1c] data-[state=active]:text-white data-[state=inactive]:bg-[#e0e0e0] data-[state=inactive]:text-[#1c1c1c] data-[state=inactive]:hover:bg-[#e87167] data-[state=inactive]:hover:text-white"
                 >
                   Addresses
                 </TabsTrigger>
@@ -411,7 +424,7 @@ export default function ProfilePage() {
                         e.target.value = capitalizeFirstLetter(e.target.value)
                         handleInputChange(e)
                       }}
-                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
+                      className={`bg-white border-[#1c1c1c] text-[#1c1c1c] ${isEditing ? 'border-2 border-[#e87167]' : ''}`}
                       disabled={!isEditing}
                       aria-label="First Name"
                     />
@@ -426,7 +439,7 @@ export default function ProfilePage() {
                         e.target.value = capitalizeFirstLetter(e.target.value)
                         handleInputChange(e)
                       }}
-                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
+                      className={`bg-white border-[#1c1c1c] text-[#1c1c1c] ${isEditing ? 'border-2 border-[#e87167]' : ''}`}
                       disabled={!isEditing}
                       aria-label="Last Name"
                     />
@@ -450,7 +463,7 @@ export default function ProfilePage() {
                       name="phone"
                       value={profile.phone}
                       onChange={handleInputChange}
-                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
+                      className={`bg-white border-[#1c1c1c] text-[#1c1c1c] ${isEditing ? 'border-2 border-[#e87167]' : ''}`}
                       disabled={!isEditing}
                       aria-label="Phone Number"
                     />
@@ -462,7 +475,7 @@ export default function ProfilePage() {
                       name="address"
                       value={profile.address}
                       onChange={handleInputChange}
-                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
+                      className={`bg-white border-[#1c1c1c] text-[#1c1c1c] ${isEditing ? 'border-2 border-[#e87167]' : ''}`}
                       disabled={!isEditing}
                       aria-label="Address"
                     />
@@ -474,7 +487,7 @@ export default function ProfilePage() {
                       name="city"
                       value={profile.city}
                       onChange={handleInputChange}
-                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
+                      className={`bg-white border-[#1c1c1c] text-[#1c1c1c] ${isEditing ? 'border-2 border-[#e87167]' : ''}`}
                       disabled={!isEditing}
                       aria-label="City"
                     />
@@ -486,7 +499,7 @@ export default function ProfilePage() {
                       onValueChange={handleProvinceChange}
                       disabled={!isEditing}
                     >
-                      <SelectTrigger id="province" className="bg-white border-[#1c1c1c] text-[#1c1c1c]">
+                      <SelectTrigger id="province" className={`bg-white border-[#1c1c1c] text-[#1c1c1c] ${isEditing ? 'border-2 border-[#e87167]' : ''}`}>
                         <SelectValue placeholder="Select a province" />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
@@ -509,19 +522,29 @@ export default function ProfilePage() {
                       name="postalCode"
                       value={profile.postalCode}
                       onChange={handleInputChange}
-                      className="bg-white border-[#1c1c1c] text-[#1c1c1c]"
+                      className={`bg-white border-[#1c1c1c] text-[#1c1c1c] ${isEditing ? 'border-2 border-[#e87167]' : ''}`}
                       disabled={!isEditing}
                       aria-label="Postal Code"
                     />
                   </div>
                   {isEditing && (
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-[#1c1c1c] text-white hover:bg-[#e87167]"
-                      disabled={!hasUnsavedChanges}
-                    >
-                      Save Changes
-                    </Button>
+                    <div className="flex justify-end space-x-2">
+                      <Button 
+                        onClick={handleCancelEdit}
+                        variant="outline"
+                        className="bg-white text-[#1c1c1c] hover:bg-[#e0e0e0]"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        className="bg-[#1c1c1c] text-white hover:bg-[#e87167]"
+                        disabled={!hasUnsavedChanges}
+                      >
+                        Save Changes
+                      </Button>
+                    </div>
                   )}
                 </form>
               </TabsContent>
